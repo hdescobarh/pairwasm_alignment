@@ -14,13 +14,20 @@
 		"editor.defaultFormatter": null,
 		"[rust]": {
 			"editor.defaultFormatter": "rust-lang.rust-analyzer"
-		}
+		},
+		"[toml]": {
+			"editor.defaultFormatter": "tamasfe.even-better-toml"
+		},
+		"rust-analyzer.linkedProjects": [
+			".\\pairwise_alignment\\Cargo.toml",
+		]
 	},
 	"extensions": {
 		"recommendations": [
 			"vadimcn.vscode-lldb",
 			"rust-lang.rust-analyzer",
-			"streetsidesoftware.code-spell-checker"
+			"streetsidesoftware.code-spell-checker",
+			"tamasfe.even-better-toml"
 		]
 	},
 }
