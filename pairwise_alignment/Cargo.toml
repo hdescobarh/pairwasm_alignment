@@ -1,0 +1,36 @@
+[package]
+name = "pairwise_alignment"
+version = "0.1.0"
+edition = "2021"
+authors = ["Hans D. Escobar H. <escobar.hans@gmail.com>"]
+description = "Tool for global and local pairwaise sequence alignment"
+license = "MIT OR Apache-2.0"
+keywords = [
+    "sequence alignment",
+    "pairwise alignment",
+    "bioinformatics",
+    "WebAssembly",
+]
+categories = ["science", "wasm"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+console_error_panic_hook = { version = "0.1.7", optional = true }
+wasm-bindgen = "0.2.88"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.38"
+
+[features]
+default = ["console_error_panic_hook"]
+
+[profile.release]
+lto = true      # link-time-optimization. Gives to the LLVM more oportunities to make the code smaller and faster. Default in release is false
+opt-level = 3   # Set the goal of LLVM, default in release is 3
+panic = "abort"
+
+[profile.dev]
+lto = true    # default in dev is false
+opt-level = 1 # default in dev is 0
