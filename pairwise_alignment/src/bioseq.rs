@@ -1,12 +1,69 @@
 //! Module representing biological sequences
 
-const IUPAC_AMINOACIDS: [char; 20] = [
-    'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W',
-    'Y',
-];
+/// IUPAC Amino acid codes
+#[derive(PartialEq, Debug)]
+pub enum Aac {
+    A,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    K,
+    L,
+    M,
+    N,
+    P,
+    Q,
+    R,
+    S,
+    T,
+    V,
+    W,
+    Y,
+}
+
+impl Aac {
+    pub fn from_char(char_code: char) -> Result<Self, SeqError> {
+        if !char_code.is_ascii() {
+            return Err(SeqError::new(ErrorKind::NonAscii));
+        }
+        let char_code = char_code.to_ascii_uppercase();
+
+        Self::char_mapping(char_code)
+    }
+
+    fn char_mapping(char_code: char) -> Result<Self, SeqError> {
+        match char_code {
+            'A' => Ok(Self::A),
+            'C' => Ok(Self::C),
+            'D' => Ok(Self::D),
+            'E' => Ok(Self::E),
+            'F' => Ok(Self::F),
+            'G' => Ok(Self::G),
+            'H' => Ok(Self::H),
+            'I' => Ok(Self::I),
+            'K' => Ok(Self::K),
+            'L' => Ok(Self::L),
+            'M' => Ok(Self::M),
+            'N' => Ok(Self::N),
+            'P' => Ok(Self::P),
+            'Q' => Ok(Self::Q),
+            'R' => Ok(Self::R),
+            'S' => Ok(Self::S),
+            'T' => Ok(Self::T),
+            'V' => Ok(Self::V),
+            'W' => Ok(Self::W),
+            'Y' => Ok(Self::Y),
+            _ => Err(SeqError::new(ErrorKind::InvalidCode)),
+        }
+    }
+}
 
 pub struct Protein {
-    sequence: Vec<char>,
+    sequence: Vec<Aac>,
 }
 
 impl Protein {
@@ -14,19 +71,9 @@ impl Protein {
         if string.is_empty() {
             return Err(SeqError::new(ErrorKind::EmptyString));
         }
-
-        let mut sequence: Vec<char> = Vec::new();
+        let mut sequence: Vec<Aac> = Vec::new();
         for c in string.chars() {
-            if !c.is_ascii() {
-                return Err(SeqError::new(ErrorKind::NonAscii));
-            }
-
-            let upper_case = c.to_ascii_uppercase();
-
-            if !IUPAC_AMINOACIDS.contains(&upper_case) {
-                return Err(SeqError::new(ErrorKind::InvalidCode));
-            }
-            sequence.push(upper_case)
+            sequence.push(Aac::from_char(c)?)
         }
         Ok(Self { sequence })
     }
@@ -67,7 +114,20 @@ mod test {
     #[test]
     fn creates_protein_from_string() {
         assert_eq!(
-            Vec::from(['M', 'N', 'G', 'T', 'E', 'G', 'P', 'N', 'F', 'Y', 'V', 'P',]),
+            Vec::from([
+                Aac::M,
+                Aac::N,
+                Aac::G,
+                Aac::T,
+                Aac::E,
+                Aac::G,
+                Aac::P,
+                Aac::N,
+                Aac::F,
+                Aac::Y,
+                Aac::V,
+                Aac::P,
+            ]),
             Protein::new("MnGTEgPNFyVp").unwrap().sequence
         );
     }
