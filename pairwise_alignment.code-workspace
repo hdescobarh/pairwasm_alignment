@@ -10,6 +10,10 @@
 		"editor.formatOnSave": true,
 		"rust-analyzer.check.command": "clippy",
 		"rust-analyzer.debug.engine": "vadimcn.vscode-lldb",
+		"rust-analyzer.rustfmt.extraArgs": [
+			"--config",
+			"max_width=80"
+		],
 		"rust-analyzer.restartServerOnConfigChange": true,
 		"editor.defaultFormatter": null,
 		"[rust]": {

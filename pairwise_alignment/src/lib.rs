@@ -1,4 +1,5 @@
 pub mod bioseq;
+pub mod matrix;
 pub mod utils;
 
 use wasm_bindgen::prelude::*;
