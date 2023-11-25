@@ -6,9 +6,19 @@ pub struct Matrix<T> {
     container: Vec<T>,
 }
 
-impl<T> Matrix<T> {
+impl<T: std::clone::Clone> Matrix<T> {
     pub fn empty(rows: usize, cols: usize) -> Self {
         let container: Vec<T> = Vec::with_capacity(rows * cols);
+        Self {
+            rows,
+            cols,
+            container,
+        }
+    }
+
+    pub fn full(value: T, rows: usize, cols: usize) -> Self {
+        let container: Vec<T> =
+            Vec::from_iter(std::iter::repeat(value).take(rows * cols));
         Self {
             rows,
             cols,
