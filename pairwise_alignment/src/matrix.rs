@@ -42,7 +42,14 @@ impl<T: std::clone::Clone> Matrix<T> {
         row: usize,
         col: usize,
     ) -> Result<&mut T, MatError> {
-        todo!()
+        let index = self.map_2dim_to_1dim_index(row, col)?;
+        match self.container.get_mut(index) {
+            Some(v) => Ok(v),
+            None => Err(MatError::new(ErrorKind::EmptyAtIndex((
+                [row, col],
+                [self.rows, self.cols],
+            )))),
+        }
     }
 
     fn map_2dim_to_1dim_index(
