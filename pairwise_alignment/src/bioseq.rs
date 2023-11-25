@@ -59,3 +59,29 @@ impl SeqError {
         Self { kind, message }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn creates_protein_from_string() {
+        assert_eq!(
+            Vec::from(['M', 'N', 'G', 'T', 'E', 'G', 'P', 'N', 'F', 'Y', 'V', 'P',]),
+            Protein::new("MnGTEgPNFyVp").unwrap().sequence
+        );
+    }
+
+    #[test]
+    fn empty_string_to_protein() {
+        assert!(Protein::new("").is_err_and(|e| e.kind == ErrorKind::EmptyString))
+    }
+
+    #[test]
+    fn bad_string_to_protein() {
+        // Non-ASCII
+        assert!(Protein::new("VTVQＨKKLRT").is_err_and(|e| e.kind == ErrorKind::NonAscii));
+        // contains non IUPAC code characters
+        assert!(Protein::new("VTVQBKKLRT").is_err_and(|e| e.kind == ErrorKind::InvalidCode))
+    }
+}
