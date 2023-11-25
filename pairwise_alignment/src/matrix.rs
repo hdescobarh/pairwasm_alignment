@@ -1,5 +1,7 @@
 //! Module for matrix data structure
 
+use std::ops::{Index, IndexMut};
+
 pub struct Matrix<T> {
     rows: usize,
     cols: usize,
@@ -17,8 +19,7 @@ impl<T: std::clone::Clone> Matrix<T> {
     }
 
     pub fn full(value: T, rows: usize, cols: usize) -> Self {
-        let container: Vec<T> =
-            Vec::from_iter(std::iter::repeat(value).take(rows * cols));
+        let container: Vec<T> = Vec::from_iter(std::iter::repeat(value).take(rows * cols));
         Self {
             rows,
             cols,
@@ -28,35 +29,27 @@ impl<T: std::clone::Clone> Matrix<T> {
 
     pub fn get(&self, row: usize, col: usize) -> Result<&T, MatError> {
         let index = self.map_2dim_to_1dim_index(row, col)?;
-        match self.container.get(index) {
-            Some(v) => Ok(v),
-            None => Err(MatError::new(ErrorKind::EmptyAtIndex((
+        if index >= self.container.len() {
+            return Err(MatError::new(ErrorKind::EmptyAtIndex((
                 [row, col],
                 [self.rows, self.cols],
-            )))),
+            ))));
         }
+        Ok(&self[[row, col]])
     }
 
-    pub fn get_mut(
-        &mut self,
-        row: usize,
-        col: usize,
-    ) -> Result<&mut T, MatError> {
+    pub fn get_mut(&mut self, row: usize, col: usize) -> Result<&mut T, MatError> {
         let index = self.map_2dim_to_1dim_index(row, col)?;
-        match self.container.get_mut(index) {
-            Some(v) => Ok(v),
-            None => Err(MatError::new(ErrorKind::EmptyAtIndex((
+        if index >= self.container.len() {
+            return Err(MatError::new(ErrorKind::EmptyAtIndex((
                 [row, col],
                 [self.rows, self.cols],
-            )))),
+            ))));
         }
+        Ok(&mut self[[row, col]])
     }
 
-    fn map_2dim_to_1dim_index(
-        &self,
-        row: usize,
-        col: usize,
-    ) -> Result<usize, MatError> {
+    fn map_2dim_to_1dim_index(&self, row: usize, col: usize) -> Result<usize, MatError> {
         if (row >= self.rows) || (col >= self.cols) {
             return Err(MatError::new(ErrorKind::OutOfDimension((
                 [row, col],
@@ -67,13 +60,35 @@ impl<T: std::clone::Clone> Matrix<T> {
     }
 }
 
+impl<T: std::clone::Clone> Index<[usize; 2]> for Matrix<T> {
+    type Output = T;
+    fn index(&self, index: [usize; 2]) -> &Self::Output {
+        let i = match self.map_2dim_to_1dim_index(index[0], index[1]) {
+            Ok(i) => i,
+            Err(e) => panic!("{:?}", e),
+        };
+        &self.container[i]
+    }
+}
+
+impl<T: std::clone::Clone> IndexMut<[usize; 2]> for Matrix<T> {
+    fn index_mut(&mut self, index: [usize; 2]) -> &mut Self::Output {
+        let i = match self.map_2dim_to_1dim_index(index[0], index[1]) {
+            Ok(i) => i,
+            Err(e) => panic!("{:?}", e),
+        };
+        &mut self.container[i]
+    }
+}
+
 #[derive(Debug)]
 pub struct MatError {
     kind: ErrorKind,
     message: String,
 }
 
-#[derive(Debug)]
+#[non_exhaustive]
+#[derive(Debug, PartialEq)]
 pub enum ErrorKind {
     /// (AttemptedIndex, ActualDimension)
     OutOfDimension(([usize; 2], [usize; 2])),
@@ -127,12 +142,5 @@ mod test {
             &["🦀", "🦀", "🦀", "🦀", "🦀", "🦀", "🦀", "🦀", "🦀"],
             matrix.container.as_slice()
         );
-    }
-
-    #[test]
-    fn failed_get() {
-        // out of bounds by row
-        // out of bounds by col
-        // out of bounds because empty
     }
 }
