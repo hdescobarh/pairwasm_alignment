@@ -92,10 +92,34 @@ impl MatError {
 
 #[cfg(test)]
 mod test {
+    use super::*;
+
     #[test]
-    fn creates_valid_matrix() {
-        // empty matrix
-        // full matrix
+    fn creates_empty_matrix() {
+        let empty_array: [u8; 0] = [];
+        for (rows, cols) in [(0, 0), (3, 2), (5, 5)] {
+            let matrix: Matrix<u8> = Matrix::empty(rows, cols);
+            assert_eq!(rows * cols, matrix.container.capacity());
+            assert_eq!(&empty_array, matrix.container.as_slice());
+        }
+    }
+
+    #[test]
+    fn creates_full_matrix() {
+        // Zero dimension
+        let matrix: Matrix<&str> = Matrix::full("🦀", 2, 0);
+        assert_eq!(0, matrix.container.len());
+        let empty_array: [&str; 0] = [];
+        assert_eq!(&empty_array, matrix.container.as_slice());
+
+        // non-zero dim
+
+        let matrix: Matrix<&str> = Matrix::full("🦀", 3, 3);
+        assert_eq!(9, matrix.container.len());
+        assert_eq!(
+            &["🦀", "🦀", "🦀", "🦀", "🦀", "🦀", "🦀", "🦀", "🦀"],
+            matrix.container.as_slice()
+        );
     }
 
     #[test]
