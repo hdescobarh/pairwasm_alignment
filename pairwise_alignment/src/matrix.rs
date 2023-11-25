@@ -19,7 +19,8 @@ impl<T: std::clone::Clone> Matrix<T> {
     }
 
     pub fn full(value: T, rows: usize, cols: usize) -> Self {
-        let container: Vec<T> = Vec::from_iter(std::iter::repeat(value).take(rows * cols));
+        let container: Vec<T> =
+            Vec::from_iter(std::iter::repeat(value).take(rows * cols));
         Self {
             rows,
             cols,
@@ -142,5 +143,41 @@ mod test {
             &["🦀", "🦀", "🦀", "🦀", "🦀", "🦀", "🦀", "🦀", "🦀"],
             matrix.container.as_slice()
         );
+    }
+
+    #[test]
+    fn failed_get() {
+        let mut matrix: Matrix<&str> = Matrix::full("🐢", 3, 3);
+        // out of bounds by row
+        assert!(matrix
+            .get(3, 0)
+            .is_err_and(|e| e.kind == ErrorKind::OutOfDimension(([3, 0], [3, 3]))));
+
+        // out of bounds by col
+        assert!(matrix
+            .get(0, 3)
+            .is_err_and(|e| e.kind == ErrorKind::OutOfDimension(([0, 3], [3, 3]))));
+
+        // out of bounds because empty
+        matrix.container.pop();
+        assert!(matrix
+            .get(2, 2)
+            .is_err_and(|e| e.kind == ErrorKind::EmptyAtIndex(([2, 2], [3, 3]))));
+    }
+
+    #[test]
+    fn successful_get() {
+        let mut matrix: Matrix<&str> = Matrix::full("🐢", 3, 4);
+        *matrix.get_mut(2, 0).unwrap() = "🦀";
+        *matrix.get_mut(1, 2).unwrap() = "🦕";
+        assert_eq!(
+            &[
+                "🐢", "🐢", "🐢", "🐢", "🐢", "🐢", "🦕", "🐢", "🦀", "🐢", "🐢", "🐢",
+            ],
+            matrix.container.as_slice()
+        );
+        assert!(matrix.get(0, 1).is_ok_and(|v| *v == "🐢"));
+        assert!(matrix.get(2, 0).is_ok_and(|v| *v == "🦀"));
+        assert!(matrix.get(1, 2).is_ok_and(|v| *v == "🦕"));
     }
 }
