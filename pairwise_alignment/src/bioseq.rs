@@ -1,7 +1,7 @@
 //! Module representing biological sequences
 
 /// IUPAC Amino acid codes
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub enum Aac {
     A,
     C,
@@ -60,6 +60,15 @@ impl Aac {
             _ => Err(SeqError::new(ErrorKind::InvalidCode)),
         }
     }
+
+    /// Cantor pairing function
+    /// The function is bijective and strictly monotonic
+    pub fn map_to_int(code_1: &Self, code_2: &Self) -> u16 {
+        let k1 = *code_1 as u16;
+        let k2 = *code_2 as u16;
+        let k12 = k1 + k2;
+        (k12 * (k12 + 1)).div_euclid(2) + k2
+    }
 }
 
 pub struct Protein {
@@ -96,11 +105,15 @@ pub struct SeqError {
 impl SeqError {
     fn new(kind: ErrorKind) -> Self {
         let message: String = match kind {
-            ErrorKind::InvalidCode => "The string contains a non valid IUPAC code.".to_string(),
+            ErrorKind::InvalidCode => {
+                "The string contains a non valid IUPAC code.".to_string()
+            }
             ErrorKind::EmptyString => {
                 "The string must containt at least one IUPAC code".to_string()
             }
-            ErrorKind::NonAscii => "All the IUPAC codes must be ASCII characters.".to_string(),
+            ErrorKind::NonAscii => {
+                "All the IUPAC codes must be ASCII characters.".to_string()
+            }
         };
 
         Self { kind, message }
@@ -142,6 +155,8 @@ mod test {
         // Non-ASCII
         assert!(Protein::new("VTVQＨKKLRT").is_err_and(|e| e.kind == ErrorKind::NonAscii));
         // contains non IUPAC code characters
-        assert!(Protein::new("VTVQBKKLRT").is_err_and(|e| e.kind == ErrorKind::InvalidCode))
+        assert!(
+            Protein::new("VTVQBKKLRT").is_err_and(|e| e.kind == ErrorKind::InvalidCode)
+        )
     }
 }
