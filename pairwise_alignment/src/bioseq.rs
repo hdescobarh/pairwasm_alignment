@@ -1,7 +1,7 @@
 //! Module representing biological sequences
 
 /// IUPAC Amino acid codes
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Debug, Clone, Copy, Eq, PartialOrd, Ord)]
 pub enum Aac {
     A,
     C,
