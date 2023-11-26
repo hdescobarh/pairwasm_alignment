@@ -63,7 +63,7 @@ impl Aac {
 
     /// Cantor pairing function
     /// The function is bijective and strictly monotonic
-    pub fn map_to_int(code_1: &Self, code_2: &Self) -> u16 {
+    pub fn duple_pairing(code_1: &Self, code_2: &Self) -> u16 {
         let k1 = *code_1 as u16;
         let k2 = *code_2 as u16;
         let k12 = k1 + k2;
@@ -158,5 +158,20 @@ mod test {
         assert!(
             Protein::new("VTVQBKKLRT").is_err_and(|e| e.kind == ErrorKind::InvalidCode)
         )
+    }
+
+    #[test]
+    fn aminoacid_code_pairing() {
+        // Cantor pairing function
+        // (0,0) ↦ 0
+        assert_eq!(0, Aac::duple_pairing(&Aac::A, &Aac::A));
+        // (4,3) ↦ 31
+        assert_eq!(31, Aac::duple_pairing(&Aac::F, &Aac::E));
+        // (5,14) ↦ 204
+        assert_eq!(204, Aac::duple_pairing(&Aac::G, &Aac::R));
+        // (16,15) ↦ 511
+        assert_eq!(511, Aac::duple_pairing(&Aac::T, &Aac::S));
+        // (19,19) ↦ 760
+        assert_eq!(760, Aac::duple_pairing(&Aac::Y, &Aac::Y));
     }
 }
