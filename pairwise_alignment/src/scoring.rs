@@ -2,25 +2,59 @@
 
 use crate::bioseq::Aac;
 
+pub trait HasName {
+    fn name() -> &'static str;
+}
+
+/// Amino acid scoring Schema
+pub trait AaSchema {
+    /// Returns the score value s_{ij}, with i ≡ code_1 and j ≡ code_2.
+    fn get_score(id: u8, code_1: &Aac, code_2: &Aac) -> &'static i8;
+    fn get_table(id: u8) -> &'static [(u16, i8)];
+}
+
+/// Trait for Amino acid symmetric score tables
 /// Schemas that are symmetric only needs the upper triangular matrix
 /// Schema keys must be ordered or the binary search will be meaningless
 ///
 /// The logic is that if A_{n,m} is a symmetric matrix, then a_{i,j} = a_{j, i}. So,
 /// We only need to store the values in the diagonal plus values above or bellow it.
 /// The choice of the upper triangle is arbitrary.
-pub fn read_symmetric_protein_schema(
-    schema: &[(u16, i8)],
-    code_1: &Aac,
-    code_2: &Aac,
-) -> i8 {
-    let mut param = [code_1, code_2];
-    param.sort();
-    let key: u16 = Aac::duple_pairing(param[0], param[1]);
-    match schema.binary_search_by(|(k, _)| k.cmp(&key)) {
-        Ok(index) => schema[index].1,
-        Err(_) => panic!("Index not found. The scoring schema may be incomplete."),
+trait AaSymTable {
+    fn search(schema: &'static [(u16, i8)], code_1: &Aac, code_2: &Aac) -> &'static i8 {
+        let mut param = [code_1, code_2];
+        param.sort();
+        let key: u16 = Aac::duple_pairing(param[0], param[1]);
+        match schema.binary_search_by(|(k, _)| k.cmp(&key)) {
+            Ok(index) => &schema[index].1,
+            Err(_) => panic!("Index not found. The scoring schema may be incomplete."),
+        }
     }
 }
+
+/// BLOSUM substitution matrices
+pub struct Blosum {}
+
+impl HasName for Blosum {
+    fn name() -> &'static str {
+        "BLOSUM"
+    }
+}
+
+impl AaSchema for Blosum {
+    fn get_score(id: u8, code_1: &Aac, code_2: &Aac) -> &'static i8 {
+        Blosum::search(Blosum::get_table(id), code_1, code_2)
+    }
+
+    fn get_table(id: u8) -> &'static [(u16, i8)] {
+        match id {
+            62 => BLOSUM62,
+            _ => panic!("BLOSUM{id} is not implemented."),
+        }
+    }
+}
+
+impl AaSymTable for Blosum {}
 
 static BLOSUM62: &[(u16, i8)] = &[
     (0, 4),
@@ -241,11 +275,17 @@ mod test {
 
     use super::*;
 
-    /// Checks the table keys are ordered and unique
-    fn validate_table(table: &[(u16, i8)]) {
+    /// General function to validate all tables.
+    /// First checks that the table keys are ordered and unique.
+    /// Then, verify the table size is the wanted.
+    ///
+    /// # Arguments
+    ///
+    /// * `table` - the table to be validated.
+    /// * `expected_size` - the number of entries the table must have.
+    fn validate_table_format(table: &[(u16, i8)], expected_size: usize) {
         // if the table is ordered and its keys are unique, then for all keys k_{i}, k_{i+1}
         // the table must satisfy k_{i} < k_{i+1}.
-
         for i in 0..(table.len() - 1) {
             let a = table[i].0;
             let j = i + 1;
@@ -255,33 +295,63 @@ mod test {
                 "Invalid table. At position ({i}, {j}) found ({a}, {b})",
             )
         }
+
+        let current_size = table.len();
+        assert_eq!(
+            expected_size,
+            table.len(),
+            "The table is incomplete. Expect {expected_size} entries and found {current_size}.",
+
+        )
+    }
+
+    /// General function to validate all Amino acid scoring tables.
+    ///
+    /// # Arguments
+    ///
+    /// * 'tabe_id' - The identifier of the table. For example, for BLOSUM62 the identifier is 62.
+    /// * `expected_size` - the number of entries the table must have.
+    /// * 'score_cases' - An array of test cases for some values of the matrix.
+    fn check_aminoacid_tables<T>(
+        table_id: u8,
+        expected_size: usize,
+        score_cases: &[(i8, &Aac, &Aac)],
+    ) where
+        T: AaSymTable + AaSchema + HasName,
+    {
+        let name = T::name();
+        let table = T::get_table(table_id);
+        validate_table_format(table, expected_size);
+
+        for (expected_score, aa_code1, aa_code2) in score_cases {
+            let current_score = T::get_score(table_id, aa_code1, aa_code2);
+            assert_eq!(
+                *expected_score, *current_score,
+                "Failed {name}:{table_id} for ({aa_code1:?}, {aa_code2:?}):\
+                 expected {expected_score} and got {current_score}."
+            );
+        }
     }
 
     #[test]
     fn check_blosum62() {
-        let schema = BLOSUM62;
+        let table_id = 62;
+        let expected_size = 210;
+        let static_table = BLOSUM62;
 
-        // ensure the lenght is the correct
-        let expected_entries = 210;
-        assert_eq!(
-            expected_entries,
-            schema.len(),
-            "The table is incomplete. Expect {} entries and found {}.",
-            expected_entries,
-            schema.len()
-        );
+        let score_cases = [
+            // Diagonal extremes and mid
+            (4, &Aac::A, &Aac::A),
+            (7, &Aac::Y, &Aac::Y),
+            (6, &Aac::N, &Aac::N),
+            // Check symmetria
+            (-3, &Aac::P, &Aac::I),
+            (-3, &Aac::I, &Aac::P),
+            (-2, &Aac::Q, &Aac::G),
+            (-2, &Aac::G, &Aac::Q),
+        ];
 
-        // table ordering and uniqueness validation
-        validate_table(schema);
-
-        // Diagonal extremes and mid
-        assert_eq!(4, read_symmetric_protein_schema(schema, &Aac::A, &Aac::A));
-        assert_eq!(7, read_symmetric_protein_schema(schema, &Aac::Y, &Aac::Y));
-        assert_eq!(6, read_symmetric_protein_schema(schema, &Aac::N, &Aac::N));
-        // Check symmetria
-        assert_eq!(-3, read_symmetric_protein_schema(schema, &Aac::P, &Aac::I));
-        assert_eq!(-3, read_symmetric_protein_schema(schema, &Aac::I, &Aac::P));
-        assert_eq!(-2, read_symmetric_protein_schema(schema, &Aac::Q, &Aac::G));
-        assert_eq!(-2, read_symmetric_protein_schema(schema, &Aac::G, &Aac::Q));
+        assert_eq!(static_table, Blosum::get_table(table_id));
+        check_aminoacid_tables::<Blosum>(table_id, expected_size, &score_cases);
     }
 }
