@@ -305,6 +305,34 @@ mod test {
         )
     }
 
+    #[test]
+    #[should_panic = "The table is incomplete. Expect 5 entries and found 2."]
+    fn bad_table_size() {
+        let table: [(u16, i8); 2] = [(5, 10), (8, 42)];
+        validate_table_format(&table, 5);
+    }
+
+    #[test]
+    #[should_panic = "Invalid table. At position (1, 2) found (1, 1)"]
+    fn bad_table_keys_order_with_contiguous_repeats() {
+        let table: [(u16, i8); 5] = [(0, 12), (1, 21), (1, 30), (5, 10), (8, 42)];
+        validate_table_format(&table, 5);
+    }
+
+    #[test]
+    #[should_panic = "Invalid table. At position (1, 2) found (5, 1)"]
+    fn bad_table_keys_order_with_uncontiguous_repeats() {
+        let table: [(u16, i8); 4] = [(1, 0), (5, 10), (1, 30), (8, 42)];
+        validate_table_format(&table, 4);
+    }
+
+    #[test]
+    #[should_panic = "Invalid table. At position (2, 3) found (8, 5)"]
+    fn bad_table_keys_order_without_repeats() {
+        let table: [(u16, i8); 4] = [(1, 0), (2, 7), (8, 10), (5, 42)];
+        validate_table_format(&table, 4);
+    }
+
     /// General function to validate all Amino acid scoring tables.
     ///
     /// # Arguments
@@ -327,10 +355,54 @@ mod test {
             let current_score = T::get_score(table_id, aa_code1, aa_code2);
             assert_eq!(
                 *expected_score, *current_score,
-                "Failed {name}:{table_id} for ({aa_code1:?}, {aa_code2:?}):\
-                 expected {expected_score} and got {current_score}."
+                "Failed {} ID {} for ({:?}, {:?}): expected {} and found {}.",
+                name, table_id, aa_code1, aa_code2, expected_score, current_score
             );
         }
+    }
+
+    #[test]
+    #[should_panic = "Index not found. The scoring schema may be incomplete."]
+    fn bad_table_missing_entry() {
+        // (F,R) maps to 204
+        let fake_table: &'static [(u16, i8); 4] = &[(0, 1), (31, 2), (200, 3), (760, 4)];
+        struct Fake {}
+        impl AaSymTable for Fake {}
+        Fake::search(fake_table, &Aac::G, &Aac::R);
+    }
+
+    #[test]
+    #[should_panic = "Failed Fake ID 89 for (G, R): expected 50 and found 42."]
+    fn bad_table_mapping() {
+        struct Fake {}
+        impl AaSymTable for Fake {}
+        impl HasName for Fake {
+            fn name() -> &'static str {
+                "Fake"
+            }
+        }
+        impl AaSchema for Fake {
+            fn get_score(id: u8, code_1: &Aac, code_2: &Aac) -> &'static i8 {
+                Fake::search(Fake::get_table(id), code_1, code_2)
+            }
+
+            fn get_table(id: u8) -> &'static [(u16, i8)] {
+                let fake_table: &'static [(u16, i8); 4] =
+                    &[(0, -10), (31, 127), (204, 42), (760, -4)];
+                match id {
+                    89 => fake_table,
+                    _ => panic!("The test is bad configured."),
+                }
+            }
+        }
+
+        // The test in the strict sense start here
+        let table_id = 89;
+        let expected_size = 4;
+        let score_cases: [(i8, &Aac, &Aac); 2] =
+            [(-4, &Aac::Y, &Aac::Y), (50, &Aac::G, &Aac::R)];
+
+        check_aminoacid_tables::<Fake>(table_id, expected_size, &score_cases)
     }
 
     #[test]
@@ -351,7 +423,14 @@ mod test {
             (-2, &Aac::G, &Aac::Q),
         ];
 
+        // the following lines must be present in all blosum checks
         assert_eq!(static_table, Blosum::get_table(table_id));
         check_aminoacid_tables::<Blosum>(table_id, expected_size, &score_cases);
+    }
+
+    #[test]
+    #[should_panic = "BLOSUM13 is not implemented."]
+    fn blosum_index_doesnt_exist() {
+        Blosum::get_table(13);
     }
 }
