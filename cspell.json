@@ -48,8 +48,11 @@
     ],
     // words - list of words to be always considered correct
     "words": [
+        "bijective",
+        "BLOSUM",
         "clippy",
         "IUPAC",
+        "lenght",
         "rustfmt",
         "tamasfe",
         "vadimcn"
