@@ -1,6 +1,7 @@
 //! Module representing biological sequences
 
 /// IUPAC Amino acid codes
+/// Represents the basic 20 amino acids
 #[derive(PartialEq, Debug, Clone, Copy, Eq, PartialOrd, Ord)]
 pub enum Aac {
     A,
@@ -26,6 +27,7 @@ pub enum Aac {
 }
 
 impl Aac {
+    /// Creates a Aac (amino acid code) from the char type
     pub fn from_char(char_code: char) -> Result<Self, SeqError> {
         if !char_code.is_ascii() {
             return Err(SeqError::new(ErrorKind::NonAscii));
@@ -35,6 +37,7 @@ impl Aac {
         Self::char_mapping(char_code)
     }
 
+    // Contains the map between the valid char values amino acid code and their enum representation
     fn char_mapping(char_code: char) -> Result<Self, SeqError> {
         match char_code {
             'A' => Ok(Self::A),
@@ -61,8 +64,10 @@ impl Aac {
         }
     }
 
-    /// Cantor pairing function
-    /// The function is bijective and strictly monotonic
+    /// It is a map (amino acid code, amino acid code) ↦ integer
+    /// Represents each Aac duple as a unique integer identifier.
+    /// The current implementation is the cantor pairing function,
+    /// which is bijective and strictly monotonic.
     pub fn duple_pairing(code_1: &Self, code_2: &Self) -> u16 {
         let k1 = *code_1 as u16;
         let k2 = *code_2 as u16;
@@ -71,11 +76,27 @@ impl Aac {
     }
 }
 
+/// Representation of a protein
 pub struct Protein {
+    /// Encodes the protein primary structure
     sequence: Vec<Aac>,
 }
 
 impl Protein {
+    /// Creates a Protein from a string. The function is case-insensitive.
+    ///
+    /// # Arguments
+    ///
+    /// * `string` - a text containing valid IUPAC amino acid code points. Only accepts ASCII characters.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use pairwise_alignment::bioseq::*;
+    /// let protein: Protein = Protein::new("pvagh").unwrap();
+    /// //assert_eq!([Aac:P, Aac:V, Aac:A, Aac:G, Aac:H], protein.sequence)
+    ///
+    /// ```
     pub fn new(string: &str) -> Result<Self, SeqError> {
         if string.is_empty() {
             return Err(SeqError::new(ErrorKind::EmptyString));
