@@ -105,6 +105,21 @@ impl<T: std::clone::Clone> Matrix<T> {
         }
         Ok(row * self.cols + col)
     }
+
+    pub fn last_entry_indices(&self) -> (usize, usize) {
+        (
+            self.container.len().div_euclid(self.cols),
+            self.container.len().rem_euclid(self.cols),
+        )
+    }
+
+    pub fn push(&mut self, entry: T) -> Result<(), MatError> {
+        if self.container.len() >= self.container.capacity() {
+            return Err(MatError::new(ErrorKind::Filled([self.rows, self.cols])));
+        };
+        self.container.push(entry);
+        Ok(())
+    }
 }
 
 impl<T: std::clone::Clone> Index<[usize; 2]> for Matrix<T> {
@@ -139,7 +154,10 @@ pub struct MatError {
 pub enum ErrorKind {
     /// (AttemptedIndex, ActualDimension)
     OutOfDimension(([usize; 2], [usize; 2])),
+    /// (AttemptedIndex, ActualDimension)
     EmptyAtIndex(([usize; 2], [usize; 2])),
+    /// Dimension
+    Filled([usize; 2]),
 }
 
 impl MatError {
@@ -153,6 +171,8 @@ impl MatError {
                 "The index '{attempted:?}' belongs to Matrix bounds ('{actual:?}').\
                  but the location is empty."
             ),
+            ErrorKind::Filled([rows, cols]) => format!(
+                "Cannot add more entries, the matrix (dim {rows}⨯{cols}) is at full capacity."),
         };
 
         Self { kind, message }
