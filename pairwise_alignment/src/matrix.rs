@@ -246,4 +246,21 @@ mod test {
         assert!(matrix.get(2, 0).is_ok_and(|v| *v == "🦀"));
         assert!(matrix.get(1, 2).is_ok_and(|v| *v == "🦕"));
     }
+
+    #[test]
+    #[should_panic]
+    fn fails_access_element_by_index() {
+        let matrix = Matrix::<u8>::empty(2, 3);
+        let _ = matrix[[1, 2]];
+    }
+
+    #[test]
+    fn access_element_by_index() {
+        let mut matrix = Matrix::empty(3, 2);
+        let _ = matrix.push(10);
+        let _ = matrix.push(15);
+        assert_eq!(15, matrix[[0, 1]]);
+        matrix[[0, 1]] = 60;
+        assert_eq!(60, matrix[[0, 1]]);
+    }
 }
