@@ -1,14 +1,40 @@
-//! Module for matrix data structure
+//! Module for matricial data structures
 
 use std::ops::{Index, IndexMut};
 
+/// Representation of a Matrix (a_{i,j}), 0 ≤ i < rows , 0 ≤ j < cols
+///
+/// Internally it has a linear container of length i*j
 pub struct Matrix<T> {
+    /// number of rows
     rows: usize,
+    /// number of columns
     cols: usize,
+    /// matrix's elements collection
     container: Vec<T>,
 }
 
 impl<T: std::clone::Clone> Matrix<T> {
+    /// Creates an empty matrix of dimension rows * cols
+    /// Be aware that trying to access a_{i, j}, i,j>0 without initializing a_{i-1, j-1} will panic.
+    ///
+    /// # Arguments
+    /// * `rows` - matrix rows number
+    /// * `cols` - matrix columns number
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use pairwise_alignment::matrix::*;
+    /// let mut matrix: Matrix<u8> = Matrix::empty(2,2);
+    /// // this panics
+    /// // assert_eq!(matrix[[1,0]]);
+    ///
+    /// // matrix[[0,0]] = 20;
+    /// // matrix[[0,1]] = 15;
+    /// // matrix[[1,0]] = 42;
+    /// // assert_eq!(42, matrix[[1,1]])
+    /// ```
     pub fn empty(rows: usize, cols: usize) -> Self {
         let container: Vec<T> = Vec::with_capacity(rows * cols);
         Self {
@@ -18,6 +44,21 @@ impl<T: std::clone::Clone> Matrix<T> {
         }
     }
 
+    /// Creates a matrix of dimension rows * cols filled with a constant value: T
+    ///
+    /// # Arguments
+    /// * `rows` - matrix rows number
+    /// * `cols` - matrix columns number
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use pairwise_alignment::matrix::*;
+    /// let mut matrix: Matrix<&str> = Matrix::full("🦀", 2, 3);
+    /// assert_eq!("🦀", matrix[[1, 2]]);
+    /// matrix[[1, 2]] = "🤖";
+    /// assert_eq!("🤖", matrix[[1, 2]]);
+    /// ```
     pub fn full(value: T, rows: usize, cols: usize) -> Self {
         let container: Vec<T> =
             Vec::from_iter(std::iter::repeat(value).take(rows * cols));
@@ -28,6 +69,8 @@ impl<T: std::clone::Clone> Matrix<T> {
         }
     }
 
+    /// Returns a reference to the i,j entry of the matrix.
+    /// If the entry does not exist, it returns a MatError.
     pub fn get(&self, row: usize, col: usize) -> Result<&T, MatError> {
         let index = self.map_2dim_to_1dim_index(row, col)?;
         if index >= self.container.len() {
@@ -39,6 +82,8 @@ impl<T: std::clone::Clone> Matrix<T> {
         Ok(&self[[row, col]])
     }
 
+    /// Returns a mutable reference to the i,j entry of the matrix.
+    /// If the entry does not exist, it returns a MatError.
     pub fn get_mut(&mut self, row: usize, col: usize) -> Result<&mut T, MatError> {
         let index = self.map_2dim_to_1dim_index(row, col)?;
         if index >= self.container.len() {
@@ -50,6 +95,7 @@ impl<T: std::clone::Clone> Matrix<T> {
         Ok(&mut self[[row, col]])
     }
 
+    // Mapping between the (row, col) and single index notation
     fn map_2dim_to_1dim_index(&self, row: usize, col: usize) -> Result<usize, MatError> {
         if (row >= self.rows) || (col >= self.cols) {
             return Err(MatError::new(ErrorKind::OutOfDimension((
