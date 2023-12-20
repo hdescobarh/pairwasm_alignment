@@ -1,23 +1,25 @@
-//! Alignment scoring schemas
+//! Alignment scoring schemas.
 
 use crate::bioseq::Aac;
 
+/// Allows access to scoring schema name.
 pub trait HasName {
     fn name() -> &'static str;
 }
 
-/// Amino acid scoring Schema
+/// Types implementing this trait are considered as an **amino acid** scoring schema.
 pub trait AaSchema {
-    /// Returns the score value s_{ij}, with i ≡ code_1 and j ≡ code_2.
+    /// Returns the score value sᵢⱼ, with i ≡ code_1 and j ≡ code_2, from the schema with identifier id.
     fn get_score(id: u8, code_1: &Aac, code_2: &Aac) -> &'static i8;
+    /// Returns the complete scoring schema with identifier id.
     fn get_table(id: u8) -> &'static [(u16, i8)];
 }
 
-/// Trait for Amino acid symmetric score tables
-/// Schemas that are symmetric only needs the upper triangular matrix
-/// Schema keys must be ordered or the binary search will be meaningless
+/// Amino acid schemas implementing this trait are able to search scores
+/// looking only in the upper triangle and main diagonal.
+/// Schema keys must be ordered or the binary search will be meaningless.
 ///
-/// The logic is that if A_{n,m} is a symmetric matrix, then a_{i,j} = a_{j, i}. So,
+/// The logic is that if Aₙₘ is a symmetric matrix, then aᵢⱼ = aⱼᵢ. So,
 /// We only need to store the values in the diagonal plus values above or bellow it.
 /// The choice of the upper triangle is arbitrary.
 trait AaSymTable {
@@ -271,7 +273,7 @@ static BLOSUM62: &[(u16, i8)] = &[
 
 #[cfg(test)]
 mod test {
-    //! Table schema keys must be ORDERED and UNIQUE
+    //! Schema keys must be ORDERED and UNIQUE.
 
     use super::*;
 
@@ -284,8 +286,8 @@ mod test {
     /// * `table` - the table to be validated.
     /// * `expected_size` - the number of entries the table must have.
     fn validate_table_format(table: &[(u16, i8)], expected_size: usize) {
-        // if the table is ordered and its keys are unique, then for all keys k_{i}, k_{i+1}
-        // the table must satisfy k_{i} < k_{i+1}.
+        // if the table is ordered and its keys are unique, then for all keys kᵢ, kᵢ₊₁
+        // the table must satisfy kᵢ < kᵢ₊₁.
         for i in 0..(table.len() - 1) {
             let a = table[i].0;
             let j = i + 1;
@@ -333,7 +335,7 @@ mod test {
         validate_table_format(&table, 4);
     }
 
-    /// General function to validate all Amino acid scoring tables.
+    /// General function to validate all amino acid scoring tables.
     ///
     /// # Arguments
     ///
