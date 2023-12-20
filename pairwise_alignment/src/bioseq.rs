@@ -1,9 +1,8 @@
-//! Module representing biological sequences
+//! Data structures representing biological sequences and their building blocks.
 
 use std::fmt::Debug;
 
-/// IUPAC Amino acid codes
-/// Represents the basic 20 amino acids
+/// IUPAC Amino acid codes. Represents the basic 20 amino acids.
 #[derive(PartialEq, Debug, Clone, Copy, Eq, PartialOrd, Ord)]
 pub enum Aac {
     A,
@@ -30,7 +29,7 @@ pub enum Aac {
 
 impl Aac {
     /// Creates a Aac (amino acid code) from a single character IUPAC code.
-    /// The function is case-insensitive. Returns SeqError if the character is not a valid code
+    /// The function is case-insensitive. Returns SeqError if the character is not a valid code.
     ///
     /// # Arguments
     /// + `char_code`: - A char representing a valid IUPAC code
@@ -81,8 +80,9 @@ impl Aac {
         }
     }
 
-    /// It is a map (amino acid code, amino acid code) ↦ integer
-    /// Represents each Aac duple as a unique integer identifier.
+    /// Represents each Aac duple with a unique integer identifier.
+    ///
+    /// It is a map (amino acid code, amino acid code) ↦ integer.\n
     /// The current implementation is the cantor pairing function,
     /// which is bijective and strictly monotonic.
     pub fn duple_pairing(code_1: &Self, code_2: &Self) -> u16 {
@@ -93,16 +93,17 @@ impl Aac {
     }
 }
 
+/// Trait that allows to biological sequences to expose their content.
 pub trait HasSequence<T> {
-    /// returns the protein or nucleic acid sequence
+    /// returns the protein or nucleic acid sequence.
     fn seq(&self) -> &Vec<T>
     where
         T: Eq + Ord + Debug + Copy + Clone;
 }
 
-/// Representation of a protein
+/// Representation of a protein.
 pub struct Protein {
-    /// Encodes the protein primary structure
+    /// Encodes the protein primary structure.
     sequence: Vec<Aac>,
 }
 
@@ -145,6 +146,7 @@ impl HasSequence<Aac> for Protein {
 
 #[non_exhaustive]
 #[derive(Debug, PartialEq)]
+/// A list specifying general error categories of SeqError.
 pub enum ErrorKind {
     EmptyString,
     InvalidCode,
@@ -152,6 +154,7 @@ pub enum ErrorKind {
 }
 
 #[derive(Debug)]
+/// Error type for operations related to biological sequences manipulation.
 pub struct SeqError {
     kind: ErrorKind,
     message: String,
