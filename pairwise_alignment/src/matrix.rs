@@ -16,7 +16,7 @@ pub struct Matrix<T> {
 
 impl<T: std::clone::Clone> Matrix<T> {
     /// Creates an empty matrix of dimension rows * cols
-    /// Be aware that trying to access a_{i, j}, i,j>0 without initializing a_{i-1, j-1} will panic.
+    /// Be aware that trying to access to index a[[i, j]] without initializing it first will panic.
     ///
     /// # Arguments
     /// * `rows` - matrix rows number
@@ -27,13 +27,14 @@ impl<T: std::clone::Clone> Matrix<T> {
     /// ```
     /// use pairwise_alignment::matrix::*;
     /// let mut matrix: Matrix<u8> = Matrix::empty(2,2);
-    /// // this panics
-    /// // assert_eq!(matrix[[1,0]]);
     ///
-    /// // matrix[[0,0]] = 20;
-    /// // matrix[[0,1]] = 15;
-    /// // matrix[[1,0]] = 42;
-    /// // assert_eq!(42, matrix[[1,1]])
+    /// // this panics:
+    /// // let _ = matrix[[1,0]];
+    ///
+    /// matrix.push(20);
+    /// matrix.push(15);
+    /// matrix.push(42);
+    /// assert_eq!(42, matrix[[1,0]])
     /// ```
     pub fn empty(rows: usize, cols: usize) -> Self {
         let container: Vec<T> = Vec::with_capacity(rows * cols);
@@ -56,8 +57,8 @@ impl<T: std::clone::Clone> Matrix<T> {
     /// use pairwise_alignment::matrix::*;
     /// let mut matrix: Matrix<&str> = Matrix::full("🦀", 2, 3);
     /// assert_eq!("🦀", matrix[[1, 2]]);
-    /// matrix[[1, 2]] = "🤖";
-    /// assert_eq!("🤖", matrix[[1, 2]]);
+    /// matrix[[1, 2]] = "🐢";
+    /// assert_eq!("🐢", matrix[[1, 2]]);
     /// ```
     pub fn full(value: T, rows: usize, cols: usize) -> Self {
         let container: Vec<T> =
@@ -69,8 +70,24 @@ impl<T: std::clone::Clone> Matrix<T> {
         }
     }
 
-    /// Returns a reference to the i,j entry of the matrix.
-    /// If the entry does not exist, it returns a MatError.
+    /// Returns a reference to the matrix i,j entry.
+    /// If the entry is empty, it returns a MatError.
+    ///
+    /// # Arguments
+    /// * `row` - matrix row i,  0 ≤ i < self.rows ,
+    /// * `col` - matrix column j, 0 ≤ j < self.cols
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use pairwise_alignment::matrix::*;
+    ///
+    /// let mut matrix: Matrix<char> = Matrix::full('学', 2, 3);
+    /// assert!(matrix.get(1, 0).is_ok_and(|v| *v == '学'));
+    /// matrix[[1, 2]] = '懲';
+    /// assert!(matrix.get(1, 2).is_ok_and(|v| *v == '懲'));
+    /// assert!(matrix.get(2, 3).is_err());
+    /// ```
     pub fn get(&self, row: usize, col: usize) -> Result<&T, MatError> {
         let index = self.map_2dim_to_1dim_index(row, col)?;
         if index >= self.container.len() {
@@ -82,8 +99,24 @@ impl<T: std::clone::Clone> Matrix<T> {
         Ok(&self[[row, col]])
     }
 
-    /// Returns a mutable reference to the i,j entry of the matrix.
-    /// If the entry does not exist, it returns a MatError.
+    /// Returns a mutable reference to the matrix i,j entry.
+    /// If the entry is empty, it returns a MatError.
+    ///
+    /// # Arguments
+    /// * `row` - matrix row i,  0 ≤ i < self.rows ,
+    /// * `col` - matrix column j, 0 ≤ j < self.cols
+    ///
+    /// # Examples:
+    ///
+    /// ```
+    /// use pairwise_alignment::matrix::*;
+    ///
+    /// let mut matrix: Matrix<i128> = Matrix::full(-60, 2, 3);
+    /// assert_eq!(-60, matrix[[1, 0]]);
+    /// *matrix.get_mut(1, 2).unwrap() = 42;
+    /// assert_eq!(42, matrix[[1, 2]]);
+    /// assert!(matrix.get_mut(2, 3).is_err());
+    /// ```
     pub fn get_mut(&mut self, row: usize, col: usize) -> Result<&mut T, MatError> {
         let index = self.map_2dim_to_1dim_index(row, col)?;
         if index >= self.container.len() {
@@ -106,6 +139,56 @@ impl<T: std::clone::Clone> Matrix<T> {
         Ok(row * self.cols + col)
     }
 
+    /// Appends an element to the end of the matrix if there is sufficient spare
+    /// capacity; otherwise, returns a MatError.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use pairwise_alignment::matrix::*;
+    /// let mut matrix: Matrix<i8> = Matrix::empty(2,2);
+    ///
+    /// // this panics:
+    /// // let _ = matrix[[1,0]];
+    ///
+    /// matrix.push(0); // [0, 0]
+    /// matrix.push(-1); // [0, 1]
+    /// matrix.push(1); // [1, 0]
+    /// assert_eq!(1, matrix[[1,0]]);
+    /// matrix.push(2); // [1, 1]
+    /// assert!(matrix.push(-2).is_err()) // out of capacity
+    /// ```
+    pub fn push(&mut self, value: T) -> Result<(), MatError> {
+        if self.container.len() >= self.container.capacity() {
+            return Err(MatError::new(ErrorKind::Filled([self.rows, self.cols])));
+        };
+        self.container.push(value);
+        Ok(())
+    }
+
+    /// Returns the last non-empty matrix entry indices (row, col).
+    /// If the matrix is empty, returns None.
+    ///
+    ///
+    /// The order is from the upper to bottom row,  from the leftest to the rightest column:
+    ///     (0, 0), (0, 1), ..., (0, cols-1),
+    ///     (1, 0), (1, 1), ..., (1, cols-1),
+    ///     ⋯, (rows-1, cols-2), (rows-1, cols-1).
+    ///
+    /// ```
+    /// use pairwise_alignment::matrix::*;
+    /// let mut matrix: Matrix<&str> = Matrix::empty(3,3);
+    ///
+    /// // this panics:
+    /// // let _ = matrix[[1,0]];
+    /// assert!(matrix.last_entry_indices().is_none());
+    ///
+    /// matrix.push("🦀");
+    /// matrix.push("🐍");
+    /// matrix.push("🧙");
+    /// let (last_i, last_j) = matrix.last_entry_indices().unwrap();
+    /// assert_eq!("🧙", matrix[[last_i, last_j]])
+    /// ```
     pub fn last_entry_indices(&self) -> Option<(usize, usize)> {
         if self.container.is_empty() {
             return None;
@@ -115,14 +198,6 @@ impl<T: std::clone::Clone> Matrix<T> {
             current_index.div_euclid(self.cols),
             current_index.rem_euclid(self.cols),
         ))
-    }
-
-    pub fn push(&mut self, entry: T) -> Result<(), MatError> {
-        if self.container.len() >= self.container.capacity() {
-            return Err(MatError::new(ErrorKind::Filled([self.rows, self.cols])));
-        };
-        self.container.push(entry);
-        Ok(())
     }
 }
 
@@ -148,6 +223,7 @@ impl<T: std::clone::Clone> IndexMut<[usize; 2]> for Matrix<T> {
 }
 
 #[derive(Debug)]
+/// Error type for matricial operations
 pub struct MatError {
     kind: ErrorKind,
     message: String,
@@ -155,6 +231,7 @@ pub struct MatError {
 
 #[non_exhaustive]
 #[derive(Debug, PartialEq)]
+/// A list specifying general categories of MatErr
 pub enum ErrorKind {
     /// (AttemptedIndex, ActualDimension)
     OutOfDimension(([usize; 2], [usize; 2])),
