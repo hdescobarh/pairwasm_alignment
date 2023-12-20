@@ -106,11 +106,15 @@ impl<T: std::clone::Clone> Matrix<T> {
         Ok(row * self.cols + col)
     }
 
-    pub fn last_entry_indices(&self) -> (usize, usize) {
-        (
-            self.container.len().div_euclid(self.cols),
-            self.container.len().rem_euclid(self.cols),
-        )
+    pub fn last_entry_indices(&self) -> Option<(usize, usize)> {
+        if self.container.is_empty() {
+            return None;
+        }
+        let current_index = self.container.len() - 1;
+        Some((
+            current_index.div_euclid(self.cols),
+            current_index.rem_euclid(self.cols),
+        ))
     }
 
     pub fn push(&mut self, entry: T) -> Result<(), MatError> {
@@ -262,5 +266,15 @@ mod test {
         assert_eq!(15, matrix[[0, 1]]);
         matrix[[0, 1]] = 60;
         assert_eq!(60, matrix[[0, 1]]);
+    }
+
+    #[test]
+    fn get_last_i_j() {
+        let mut matrix: Matrix<bool> = Matrix::empty(2, 3);
+        let expected_list = [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)];
+        for expected in expected_list {
+            let _ = matrix.push(true);
+            assert_eq!(Some(expected), matrix.last_entry_indices())
+        }
     }
 }
