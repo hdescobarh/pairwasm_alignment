@@ -1,10 +1,10 @@
-//! Module for matricial data structures
+//! Matricial data structures
 
 use std::ops::{Index, IndexMut};
 
-/// Representation of a Matrix (a_{i,j}), 0 ≤ i < rows , 0 ≤ j < cols
+/// Representation of a Matrix (aᵢⱼ), 0 ≤ i < rows , 0 ≤ j < cols
 ///
-/// Internally it has a linear container of length i*j
+/// Internally it has a linear container of length i⨯j
 pub struct Matrix<T> {
     /// number of rows
     rows: usize,
