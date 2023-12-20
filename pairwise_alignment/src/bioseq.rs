@@ -29,7 +29,22 @@ pub enum Aac {
 }
 
 impl Aac {
-    /// Creates a Aac (amino acid code) from the char type
+    /// Creates a Aac (amino acid code) from a single character IUPAC code.
+    /// The function is case-insensitive. Returns SeqError if the character is not a valid code
+    ///
+    /// # Arguments
+    /// + `char_code`: - A char representing a valid IUPAC code
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use pairwise_alignment::bioseq::*;
+    ///
+    /// let lys = Aac::from_char('l').unwrap();
+    /// assert_eq!(Aac::L, lys);
+    /// assert_eq!(lys, Aac::from_char('L').unwrap());
+    /// assert!(Aac::from_char('Z').is_err())
+    /// ```
     pub fn from_char(char_code: char) -> Result<Self, SeqError> {
         if !char_code.is_ascii() {
             return Err(SeqError::new(ErrorKind::NonAscii));
@@ -79,6 +94,7 @@ impl Aac {
 }
 
 pub trait HasSequence<T> {
+    /// returns the protein or nucleic acid sequence
     fn seq(&self) -> &Vec<T>
     where
         T: Eq + Ord + Debug + Copy + Clone;
@@ -92,6 +108,7 @@ pub struct Protein {
 
 impl Protein {
     /// Creates a Protein from a string. The function is case-insensitive.
+    /// Returns SeqError if the string contains non-valid IUPAC codes.
     ///
     /// # Arguments
     ///
@@ -101,9 +118,9 @@ impl Protein {
     ///
     /// ```
     /// use pairwise_alignment::bioseq::*;
-    /// let protein: Protein = Protein::new("pvagh").unwrap();
-    /// //assert_eq!([Aac:P, Aac:V, Aac:A, Aac:G, Aac:H], protein.sequence)
-    ///
+    /// let protein = Protein::new("pVaGH").unwrap();
+    /// assert_eq!([Aac::P, Aac::V, Aac::A, Aac::G, Aac::H].to_vec(),*protein.seq());
+    /// assert!(Protein::new("pBaGH").is_err())
     /// ```
     pub fn new(string: &str) -> Result<Self, SeqError> {
         if string.is_empty() {
