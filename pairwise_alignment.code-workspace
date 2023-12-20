@@ -12,7 +12,7 @@
 		"rust-analyzer.debug.engine": "vadimcn.vscode-lldb",
 		"rust-analyzer.rustfmt.extraArgs": [
 			"--config",
-			"max_width=80"
+			"max_width=90"
 		],
 		"rust-analyzer.restartServerOnConfigChange": true,
 		"editor.defaultFormatter": null,
