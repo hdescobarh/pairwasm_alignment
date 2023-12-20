@@ -1,26 +1,26 @@
-//! Matricial data structures
+//! Matricial data structures.
 
 use std::ops::{Index, IndexMut};
 
-/// Representation of a Matrix (aᵢⱼ), 0 ≤ i < rows , 0 ≤ j < cols
+/// Representation of a Matrix (aᵢⱼ), 0 ≤ i < rows , 0 ≤ j < cols.
 ///
-/// Internally it has a linear container of length i⨯j
+/// Internally it has a linear container of length i⨯j.
 pub struct Matrix<T> {
-    /// number of rows
+    /// number of rows.
     rows: usize,
-    /// number of columns
+    /// number of columns.
     cols: usize,
-    /// matrix's elements collection
+    /// matrix's elements collection.
     container: Vec<T>,
 }
 
 impl<T: std::clone::Clone> Matrix<T> {
-    /// Creates an empty matrix of dimension rows * cols
+    /// Creates an empty matrix of dimension rows * cols.
     /// Be aware that trying to access to index a[[i, j]] without initializing it first will panic.
     ///
     /// # Arguments
-    /// * `rows` - matrix rows number
-    /// * `cols` - matrix columns number
+    /// * `rows` - matrix rows number.
+    /// * `cols` - matrix columns number.
     ///
     /// # Examples:
     ///
@@ -45,11 +45,11 @@ impl<T: std::clone::Clone> Matrix<T> {
         }
     }
 
-    /// Creates a matrix of dimension rows * cols filled with a constant value: T
+    /// Creates a matrix of dimension rows * cols filled with a constant value: T.
     ///
     /// # Arguments
-    /// * `rows` - matrix rows number
-    /// * `cols` - matrix columns number
+    /// * `rows` - matrix rows number.
+    /// * `cols` - matrix columns number.
     ///
     /// # Examples:
     ///
@@ -223,7 +223,7 @@ impl<T: std::clone::Clone> IndexMut<[usize; 2]> for Matrix<T> {
 }
 
 #[derive(Debug)]
-/// Error type for matricial operations
+/// Error type for matricial operations.
 pub struct MatError {
     kind: ErrorKind,
     message: String,
@@ -231,13 +231,13 @@ pub struct MatError {
 
 #[non_exhaustive]
 #[derive(Debug, PartialEq)]
-/// A list specifying general categories of MatErr
+/// A list specifying general categories of MatErr.
 pub enum ErrorKind {
-    /// (AttemptedIndex, ActualDimension)
+    // (AttemptedIndex, ActualDimension).
     OutOfDimension(([usize; 2], [usize; 2])),
-    /// (AttemptedIndex, ActualDimension)
+    // (AttemptedIndex, ActualDimension).
     EmptyAtIndex(([usize; 2], [usize; 2])),
-    /// Dimension
+    // Dimension.
     Filled([usize; 2]),
 }
 
