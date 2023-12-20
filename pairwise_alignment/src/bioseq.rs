@@ -1,5 +1,7 @@
 //! Module representing biological sequences
 
+use std::fmt::Debug;
+
 /// IUPAC Amino acid codes
 /// Represents the basic 20 amino acids
 #[derive(PartialEq, Debug, Clone, Copy, Eq, PartialOrd, Ord)]
@@ -76,6 +78,12 @@ impl Aac {
     }
 }
 
+pub trait HasSequence<T> {
+    fn seq(&self) -> &Vec<T>
+    where
+        T: Eq + Ord + Debug + Copy + Clone;
+}
+
 /// Representation of a protein
 pub struct Protein {
     /// Encodes the protein primary structure
@@ -106,6 +114,15 @@ impl Protein {
             sequence.push(Aac::from_char(c)?)
         }
         Ok(Self { sequence })
+    }
+}
+
+impl HasSequence<Aac> for Protein {
+    fn seq(&self) -> &Vec<Aac>
+    where
+        Aac: Eq + Ord + Debug + Copy + Clone,
+    {
+        &self.sequence
     }
 }
 
@@ -194,5 +211,14 @@ mod test {
         assert_eq!(511, Aac::duple_pairing(&Aac::T, &Aac::S));
         // (19,19) ↦ 760
         assert_eq!(760, Aac::duple_pairing(&Aac::Y, &Aac::Y));
+    }
+
+    #[test]
+    fn read_sequence_from_external() {
+        let protein: Protein = Protein::new("pVaGH").unwrap();
+        assert_eq!(
+            [Aac::P, Aac::V, Aac::A, Aac::G, Aac::H].to_vec(),
+            *protein.seq()
+        )
     }
 }
