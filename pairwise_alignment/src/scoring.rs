@@ -2,7 +2,7 @@
 
 use crate::bioseq::Aac;
 
-/// Allows access to scoring schema name.
+/// Allows access to the scoring schema name.
 pub trait HasName {
     fn name() -> &'static str;
 }
@@ -15,12 +15,12 @@ pub trait AaSchema {
     fn get_table(id: u8) -> &'static [(u16, i8)];
 }
 
-/// Amino acid schemas implementing this trait are able to search scores
+/// Amino acid scoring schemas implementing this trait are able to search scores
 /// looking only in the upper triangle and main diagonal.
 /// Schema keys must be ordered or the binary search will be meaningless.
 ///
 /// The logic is that if Aₙₘ is a symmetric matrix, then aᵢⱼ = aⱼᵢ. So,
-/// We only need to store the values in the diagonal plus values above or bellow it.
+/// we only need to store the values in the main diagonal plus values above or bellow it.
 /// The choice of the upper triangle is arbitrary.
 trait AaSymTable {
     fn search(schema: &'static [(u16, i8)], code_1: &Aac, code_2: &Aac) -> &'static i8 {
@@ -34,7 +34,7 @@ trait AaSymTable {
     }
 }
 
-/// BLOSUM substitution matrices
+/// BLOSUM substitution matrices.
 pub struct Blosum {}
 
 impl HasName for Blosum {
@@ -59,6 +59,7 @@ impl AaSchema for Blosum {
 
 impl AaSymTable for Blosum {}
 
+/// PAM substitution matrices.
 pub struct Pam {}
 
 impl HasName for Pam {
