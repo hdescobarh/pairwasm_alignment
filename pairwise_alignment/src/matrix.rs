@@ -61,8 +61,7 @@ impl<T: std::clone::Clone> Matrix<T> {
     /// assert_eq!("🐢", matrix[[1, 2]]);
     /// ```
     pub fn full(value: T, rows: usize, cols: usize) -> Self {
-        let container: Vec<T> =
-            Vec::from_iter(std::iter::repeat(value).take(rows * cols));
+        let container: Vec<T> = vec![value; rows * cols];
         Self {
             rows,
             cols,
