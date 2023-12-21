@@ -908,4 +908,33 @@ mod test {
         assert_eq!(static_table, Blosum::get_table(table_id));
         check_aminoacid_tables::<Blosum>(table_id, expected_size, &score_cases);
     }
+
+    #[test]
+    #[should_panic = "PAM13 is not implemented."]
+    fn pam_index_doesnt_exist() {
+        Pam::get_table(13);
+    }
+
+    #[test]
+    fn check_pam160() {
+        let table_id = 160;
+        let expected_size = 210;
+        let static_table = PAM160;
+
+        let score_cases = [
+            // Diagonal extremes and mid
+            (2, &Aac::A, &Aac::A),
+            (8, &Aac::Y, &Aac::Y),
+            (3, &Aac::N, &Aac::N),
+            // Check symmetria
+            (-2, &Aac::P, &Aac::I),
+            (-2, &Aac::I, &Aac::P),
+            (-2, &Aac::Q, &Aac::G),
+            (-2, &Aac::G, &Aac::Q),
+        ];
+
+        // the following lines must be present in all pam checks
+        assert_eq!(static_table, Pam::get_table(table_id));
+        check_aminoacid_tables::<Pam>(table_id, expected_size, &score_cases);
+    }
 }
