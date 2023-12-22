@@ -35,7 +35,7 @@
             "max_width=90"
         ],
         "rust-analyzer.linkedProjects": [
-            ".\\pairwise_alignment\\Cargo.toml",
+            ".\\Cargo.toml",
         ],
         "rust-analyzer.restartServerOnConfigChange": true,
     },
