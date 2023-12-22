@@ -53,6 +53,7 @@
         "clippy",
         "IUPAC",
         "lenght",
+        "Needleman",
         "rustfmt",
         "tamasfe",
         "vadimcn"
