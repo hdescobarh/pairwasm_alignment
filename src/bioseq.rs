@@ -1,9 +1,11 @@
 //! Data structures representing biological sequences and their building blocks.
 
+use crate::utils::AlignmentUnit;
 use std::fmt::Debug;
 
 /// IUPAC Amino acid codes. Represents the basic 20 amino acids.
 #[derive(PartialEq, Debug, Clone, Copy, Eq, PartialOrd, Ord)]
+#[repr(u8)]
 pub enum Aac {
     A,
     C,
@@ -79,17 +81,11 @@ impl Aac {
             _ => Err(SeqError::new(ErrorKind::InvalidCode)),
         }
     }
+}
 
-    /// Represents each Aac duple with a unique integer identifier.
-    ///
-    /// It is a map (amino acid code, amino acid code) ↦ integer.\n
-    /// The current implementation is the cantor pairing function,
-    /// which is bijective and strictly monotonic.
-    pub fn duple_pairing(code_1: &Self, code_2: &Self) -> u16 {
-        let k1 = *code_1 as u16;
-        let k2 = *code_2 as u16;
-        let k12 = k1 + k2;
-        (k12 * (k12 + 1)).div_euclid(2) + k2
+impl AlignmentUnit for Aac {
+    fn duple_pairing(code_1: Self, code_2: Self) -> u16 {
+        Aac::cantor_pairing(code_1 as u16, code_2 as u16)
     }
 }
 
@@ -98,7 +94,7 @@ pub trait HasSequence<T> {
     /// returns the protein or nucleic acid sequence.
     fn seq(&self) -> &Vec<T>
     where
-        T: Eq + Ord + Debug + Copy + Clone;
+        T: Eq + Ord + Debug + Copy + AlignmentUnit;
 }
 
 /// Representation of a protein.
@@ -136,10 +132,7 @@ impl Protein {
 }
 
 impl HasSequence<Aac> for Protein {
-    fn seq(&self) -> &Vec<Aac>
-    where
-        Aac: Eq + Ord + Debug + Copy + Clone,
-    {
+    fn seq(&self) -> &Vec<Aac> {
         &self.sequence
     }
 }
@@ -222,15 +215,15 @@ mod test {
     fn aminoacid_code_pairing() {
         // Cantor pairing function
         // (0,0) ↦ 0
-        assert_eq!(0, Aac::duple_pairing(&Aac::A, &Aac::A));
+        assert_eq!(0, Aac::duple_pairing(Aac::A, Aac::A));
         // (4,3) ↦ 31
-        assert_eq!(31, Aac::duple_pairing(&Aac::F, &Aac::E));
+        assert_eq!(31, Aac::duple_pairing(Aac::F, Aac::E));
         // (5,14) ↦ 204
-        assert_eq!(204, Aac::duple_pairing(&Aac::G, &Aac::R));
+        assert_eq!(204, Aac::duple_pairing(Aac::G, Aac::R));
         // (16,15) ↦ 511
-        assert_eq!(511, Aac::duple_pairing(&Aac::T, &Aac::S));
+        assert_eq!(511, Aac::duple_pairing(Aac::T, Aac::S));
         // (19,19) ↦ 760
-        assert_eq!(760, Aac::duple_pairing(&Aac::Y, &Aac::Y));
+        assert_eq!(760, Aac::duple_pairing(Aac::Y, Aac::Y));
     }
 
     #[test]

@@ -1,6 +1,6 @@
 //! Alignment scoring schemas.
 
-use crate::bioseq::Aac;
+use crate::{bioseq::Aac, utils::AlignmentUnit};
 
 /// Allows access to the scoring schema name.
 pub trait HasName {
@@ -26,7 +26,7 @@ trait AaSymTable {
     fn search(schema: &'static [(u16, i8)], code_1: &Aac, code_2: &Aac) -> &'static i8 {
         let mut param = [code_1, code_2];
         param.sort();
-        let key: u16 = Aac::duple_pairing(param[0], param[1]);
+        let key: u16 = Aac::duple_pairing(*param[0], *param[1]);
         match schema.binary_search_by(|(k, _)| k.cmp(&key)) {
             Ok(index) => &schema[index].1,
             Err(_) => panic!("Index not found. The scoring schema may be incomplete."),
