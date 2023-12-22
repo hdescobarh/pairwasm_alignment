@@ -1,37 +1,51 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
-	],
-	"settings": {
-		"files.eol": "auto",
-		"files.encoding": "utf8",
-		"editor.formatOnSave": true,
-		"rust-analyzer.check.command": "clippy",
-		"rust-analyzer.debug.engine": "vadimcn.vscode-lldb",
-		"rust-analyzer.rustfmt.extraArgs": [
-			"--config",
-			"max_width=90"
-		],
-		"rust-analyzer.restartServerOnConfigChange": true,
-		"editor.defaultFormatter": null,
-		"[rust]": {
-			"editor.defaultFormatter": "rust-lang.rust-analyzer"
-		},
-		"[toml]": {
-			"editor.defaultFormatter": "tamasfe.even-better-toml"
-		},
-		"rust-analyzer.linkedProjects": [
-			".\\pairwise_alignment\\Cargo.toml",
-		]
-	},
-	"extensions": {
-		"recommendations": [
-			"vadimcn.vscode-lldb",
-			"rust-lang.rust-analyzer",
-			"streetsidesoftware.code-spell-checker",
-			"tamasfe.even-better-toml"
-		]
-	},
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "editor.formatOnSave": true,
+        "files.eol": "\n",
+        "files.encoding": "utf8",
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "editor.detectIndentation": false,
+        "editor.indentSize": "tabSize",
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": null,
+        "[toml]": {
+            "editor.defaultFormatter": "tamasfe.even-better-toml"
+        },
+        "[markdown]": {
+            "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+            "files.trimTrailingWhitespace": false,
+            "editor.tabSize": 2,
+        },
+        "[yaml]": {
+            "editor.tabSize": 2,
+        },
+        "[rust]": {
+            "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        },
+        "rust-analyzer.check.command": "clippy",
+        "rust-analyzer.debug.engine": "vadimcn.vscode-lldb",
+        "rust-analyzer.rustfmt.extraArgs": [
+            "--config",
+            "max_width=90"
+        ],
+        "rust-analyzer.linkedProjects": [
+            ".\\pairwise_alignment\\Cargo.toml",
+        ],
+        "rust-analyzer.restartServerOnConfigChange": true,
+    },
+    "extensions": {
+        "recommendations": [
+            "vadimcn.vscode-lldb",
+            "rust-lang.rust-analyzer",
+            "streetsidesoftware.code-spell-checker",
+            "tamasfe.even-better-toml",
+            "DavidAnson.vscode-markdownlint"
+        ]
+    },
 }
