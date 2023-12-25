@@ -33,4 +33,4 @@ package-lock.json
 #package.json
 
 ## wildcard
-_ignore_*/
+_ignore_*
