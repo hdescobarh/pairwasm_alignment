@@ -2,7 +2,6 @@
 mod aminoacid_data;
 mod aminoacid_schema;
 mod gap_penalty;
-mod substitution; // delete this
 
 use crate::bioseq::Aac;
 use crate::utils::AlignmentUnit;
@@ -32,5 +31,10 @@ where
 {
     pub fn new(score_table: S, gap: P) -> Self {
         Self { score_table, gap }
+    }
+
+    pub fn prueba() {
+        let new = ScoringSchema::new(Blosum62 {}, Affine::new(0.5, 0.7));
+        let x = new.score_table.get_score(Aac::A, Aac::D);
     }
 }
