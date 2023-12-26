@@ -4,7 +4,7 @@ use super::aminoacid_data;
 use super::SubstitutionSchema;
 use crate::bioseq::Aac;
 
-struct Blosum45 {}
+pub struct Blosum45 {}
 
 impl SubstitutionSchema<Aac> for Blosum45 {
     fn get_score(&self, code_1: Aac, code_2: Aac) -> i8 {
@@ -20,7 +20,7 @@ impl SubstitutionSchema<Aac> for Blosum62 {
     }
 }
 
-struct Pam160 {}
+pub struct Pam160 {}
 
 impl SubstitutionSchema<Aac> for Pam160 {
     fn get_score(&self, code_1: Aac, code_2: Aac) -> i8 {
