@@ -1,57 +1,77 @@
-//! Gap penalty schemas
+//! Gap penalty schemas.
 // A gap is a spaces chain, the lenght is the number of spaces. So,
 // the minimum possible lenght of a gap is 1, then the lenght >= 1
 
-// Flag for gap penalty schemas
+// This must be a primitive float.
+type CostType = f64;
+
+/// Flag for gap penalty schemas.
 pub trait Penalty {
-    // The gap penalty is a map $(lenght) \mapto \mathbb(R)$.
-    fn gap_penalty(&self, lenght: usize) -> f64;
+    /// The gap penalty is a map $(lenght) \mapto \mathbb(R)$.
+    fn function(&self, lenght: usize) -> CostType;
+
+    /// Get the open gap parameter. Be aware that under some gap penalty models
+    /// this value can be different from calling f(1).
+    /// For example, under affine model, f(1) = open_cost + extend_cost * 1.
+    fn open(&self) -> CostType;
+    /// Get the extend gap parameter.
+    fn extend(&self) -> CostType;
 }
 
-// Implements affine gap model.
+/// Implements affine gap model.
+/// f(lenght) = open_cost + extend_cost * lenght, lenght \in Z+
 pub struct Affine {
-    gap_open: f64,
-    gap_extend: f64,
+    open_cost: CostType,
+    extend_cost: CostType,
 }
 
 impl Affine {
-    pub fn new(gap_open: f32, gap_extend: f32) -> Self {
+    pub fn new(open_cost: f32, extend_cost: f32) -> Self {
         Self {
-            gap_open: gap_open as f64,
-            gap_extend: gap_extend as f64,
+            open_cost: open_cost as CostType,
+            extend_cost: extend_cost as CostType,
         }
-    }
-
-    pub fn get_open(&self) -> f64 {
-        self.gap_open
-    }
-
-    pub fn get_extend(&self) -> f64 {
-        self.gap_extend
     }
 }
 
 impl Penalty for Affine {
-    fn gap_penalty(&self, lenght: usize) -> f64 {
-        self.gap_open + (self.gap_extend * lenght as f64)
+    fn function(&self, lenght: usize) -> CostType {
+        self.open_cost + (self.extend_cost * lenght as CostType)
+    }
+    fn open(&self) -> CostType {
+        self.open_cost
+    }
+    fn extend(&self) -> CostType {
+        self.extend_cost
     }
 }
 
-pub struct Constant {
-    value: f64,
+/// Implements linear gap model.
+/// f(lenght) = extend_cost * lenght, lenght \in Z+.
+/// open_cost is a constant 0.
+pub struct Linear {
+    extend_cost: CostType,
 }
 
-impl Constant {
-    pub fn new(value: f32) -> Self {
+impl Linear {
+    pub fn new(extend_cost: f32) -> Self {
         Self {
-            value: value as f64,
+            extend_cost: extend_cost as CostType,
         }
     }
 }
 
-impl Penalty for Constant {
-    fn gap_penalty(&self, _lenght: usize) -> f64 {
-        self.value
+impl Penalty for Linear {
+    fn function(&self, lenght: usize) -> CostType {
+        self.extend_cost * lenght as CostType
+    }
+
+    fn open(&self) -> CostType {
+        0.0
+    }
+
+    fn extend(&self) -> CostType {
+        self.extend_cost
     }
 }
 
