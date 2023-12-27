@@ -2,15 +2,13 @@
 // A gap is a spaces chain, the length is the number of spaces. So,
 // the minimum possible length of a gap is 1, then the length >= 1
 
+use super::CostType;
 use super::GapPenalty;
 
-pub const MIN_OPEN_COST: f32 = 1.0;
-pub const MAX_OPEN_COST: f32 = 100.0;
-pub const MIN_EXTEND_COST: f32 = 0.0;
-pub const MAX_EXTEND_COST: f32 = 10.0;
-
-// This must be a primitive float.
-type CostType = f64;
+pub const MIN_OPEN_COST: CostType = 1.0;
+pub const MAX_OPEN_COST: CostType = 100.0;
+pub const MIN_EXTEND_COST: CostType = 0.0;
+pub const MAX_EXTEND_COST: CostType = 10.0;
 
 /// Implements affine gap model.
 /// f(length) = open_cost + extend_cost * length, length \in Z+
@@ -20,12 +18,12 @@ pub struct Affine {
 }
 
 impl Affine {
-    pub fn new(open_cost: f32, extend_cost: f32) -> Self {
+    pub fn new(open_cost: CostType, extend_cost: CostType) -> Self {
         check_open_cost(&open_cost);
         check_extend_cost(&extend_cost);
         Self {
-            open_cost: open_cost as CostType,
-            extend_cost: extend_cost as CostType,
+            open_cost: open_cost,
+            extend_cost: extend_cost,
         }
     }
 }
@@ -51,10 +49,10 @@ pub struct Linear {
 }
 
 impl Linear {
-    pub fn new(extend_cost: f32) -> Self {
+    pub fn new(extend_cost: CostType) -> Self {
         check_extend_cost(&extend_cost);
         Self {
-            extend_cost: extend_cost as CostType,
+            extend_cost: extend_cost,
         }
     }
 }
@@ -80,7 +78,7 @@ fn check_length(length: usize) {
     }
 }
 
-fn check_open_cost(open_cost: &f32) {
+fn check_open_cost(open_cost: &CostType) {
     if !(MIN_OPEN_COST..=MAX_OPEN_COST).contains(open_cost) {
         panic!(
             "Invalid gap open cost ({}). It must be in the closed interval [{}, {}]",
@@ -89,7 +87,7 @@ fn check_open_cost(open_cost: &f32) {
     }
 }
 
-fn check_extend_cost(extend_cost: &f32) {
+fn check_extend_cost(extend_cost: &CostType) {
     if !(MIN_EXTEND_COST..=MAX_EXTEND_COST).contains(extend_cost) {
         panic!(
             "Invalid gap extend cost ({}). It must be in the closed interval [{}, {}]",

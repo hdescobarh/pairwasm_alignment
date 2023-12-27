@@ -2,12 +2,13 @@
 
 use super::aminoacid_data;
 use super::Similarity;
+use super::SimilarityType;
 use crate::bioseq::Aac;
 
 pub struct Blosum45 {}
 
 impl Similarity<Aac> for Blosum45 {
-    fn read_score(&self, code_1: Aac, code_2: Aac) -> i8 {
+    fn read_score(&self, code_1: Aac, code_2: Aac) -> SimilarityType {
         aminoacid_data::read_blosum45(code_1, code_2)
     }
 }
@@ -15,7 +16,7 @@ impl Similarity<Aac> for Blosum45 {
 pub struct Blosum62 {}
 
 impl Similarity<Aac> for Blosum62 {
-    fn read_score(&self, code_1: Aac, code_2: Aac) -> i8 {
+    fn read_score(&self, code_1: Aac, code_2: Aac) -> SimilarityType {
         aminoacid_data::read_blosum62(code_1, code_2)
     }
 }
@@ -23,7 +24,7 @@ impl Similarity<Aac> for Blosum62 {
 pub struct Pam160 {}
 
 impl Similarity<Aac> for Pam160 {
-    fn read_score(&self, code_1: Aac, code_2: Aac) -> i8 {
+    fn read_score(&self, code_1: Aac, code_2: Aac) -> SimilarityType {
         aminoacid_data::read_pam160(code_1, code_2)
     }
 }
@@ -136,7 +137,7 @@ mod test {
     }
 
     #[test]
-    fn paread_pam160_is_complete() {
+    fn read_pam160_is_complete() {
         let pam = Pam160 {};
         for code_1 in ALL_AAC {
             for code_2 in ALL_AAC {
