@@ -24,17 +24,18 @@
             ]
         },
         {
-            "languageId": "rust",
-            "includeRegExpList": [
-                "[/]{2,3}.*",
-                "[/][*]+\n?([\\S\\s]*?)[*][/]"
-            ],
-            "dictionaries": []
+            "languageId": "rust" //,
+            //"includeRegExpList": [
+            //    "[/]{2,3}.*",
+            //    "[/][*]+\n?([\\S\\s]*?)[*][/]"
+            //]
         }
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.
-    "flagWords": [],
+    "flagWords": [
+        "lenght"
+    ],
     //
     "enableFiletypes": [
         "rust",
@@ -42,6 +43,7 @@
     ],
     // Specify paths/files to ignore.
     "ignorePaths": [
+        "cspell.json", // Ignore this file
         "**/node_modules", // this will ignore anything the node_modules directory
         ".git", // Ignore the .git directory
         "*.toml" // Ignore all .toml files.
@@ -50,9 +52,9 @@
     "words": [
         "bijective",
         "BLOSUM",
+        "PAM",
         "clippy",
         "IUPAC",
-        "lenght",
         "Needleman",
         "rustfmt",
         "tamasfe",
