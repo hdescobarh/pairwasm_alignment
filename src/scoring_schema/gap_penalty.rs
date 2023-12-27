@@ -2,21 +2,10 @@
 // A gap is a spaces chain, the lenght is the number of spaces. So,
 // the minimum possible lenght of a gap is 1, then the lenght >= 1
 
+use super::GapPenalty;
+
 // This must be a primitive float.
 type CostType = f64;
-
-/// Flag for gap penalty schemas.
-pub trait Penalty {
-    /// The gap penalty is a map $(lenght) \mapto \mathbb(R)$.
-    fn function(&self, lenght: usize) -> CostType;
-
-    /// Get the open gap parameter. Be aware that under some gap penalty models
-    /// this value can be different from calling f(1).
-    /// For example, under affine model, f(1) = open_cost + extend_cost * 1.
-    fn open(&self) -> CostType;
-    /// Get the extend gap parameter.
-    fn extend(&self) -> CostType;
-}
 
 /// Implements affine gap model.
 /// f(lenght) = open_cost + extend_cost * lenght, lenght \in Z+
@@ -34,7 +23,7 @@ impl Affine {
     }
 }
 
-impl Penalty for Affine {
+impl GapPenalty for Affine {
     fn function(&self, lenght: usize) -> CostType {
         self.open_cost + (self.extend_cost * lenght as CostType)
     }
@@ -61,7 +50,7 @@ impl Linear {
     }
 }
 
-impl Penalty for Linear {
+impl GapPenalty for Linear {
     fn function(&self, lenght: usize) -> CostType {
         self.extend_cost * lenght as CostType
     }

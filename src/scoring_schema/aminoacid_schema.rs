@@ -1,29 +1,29 @@
 //! Amino acid scoring schemas
 
 use super::aminoacid_data;
-use super::SubstitutionSchema;
+use super::Similarity;
 use crate::bioseq::Aac;
 
 pub struct Blosum45 {}
 
-impl SubstitutionSchema<Aac> for Blosum45 {
-    fn get_score(&self, code_1: Aac, code_2: Aac) -> i8 {
+impl Similarity<Aac> for Blosum45 {
+    fn read_score(&self, code_1: Aac, code_2: Aac) -> i8 {
         aminoacid_data::read_blosum45(code_1, code_2)
     }
 }
 
 pub struct Blosum62 {}
 
-impl SubstitutionSchema<Aac> for Blosum62 {
-    fn get_score(&self, code_1: Aac, code_2: Aac) -> i8 {
+impl Similarity<Aac> for Blosum62 {
+    fn read_score(&self, code_1: Aac, code_2: Aac) -> i8 {
         aminoacid_data::read_blosum62(code_1, code_2)
     }
 }
 
 pub struct Pam160 {}
 
-impl SubstitutionSchema<Aac> for Pam160 {
-    fn get_score(&self, code_1: Aac, code_2: Aac) -> i8 {
+impl Similarity<Aac> for Pam160 {
+    fn read_score(&self, code_1: Aac, code_2: Aac) -> i8 {
         aminoacid_data::read_pam160(code_1, code_2)
     }
 }
@@ -71,7 +71,7 @@ mod test {
             (-2, Aac::G, Aac::Q),
         ];
         for (expected, code_1, code_2) in score_cases {
-            assert_eq!(expected, blosum.get_score(code_1, code_2))
+            assert_eq!(expected, blosum.read_score(code_1, code_2))
         }
     }
 
@@ -80,7 +80,7 @@ mod test {
         let blosum = Blosum45 {};
         for code_1 in ALL_AAC {
             for code_2 in ALL_AAC {
-                blosum.get_score(code_1, code_2);
+                blosum.read_score(code_1, code_2);
             }
         }
     }
@@ -101,7 +101,7 @@ mod test {
         ];
 
         for (expected, code_1, code_2) in score_cases {
-            assert_eq!(expected, blosum.get_score(code_1, code_2))
+            assert_eq!(expected, blosum.read_score(code_1, code_2))
         }
     }
 
@@ -110,7 +110,7 @@ mod test {
         let blosum = Blosum62 {};
         for code_1 in ALL_AAC {
             for code_2 in ALL_AAC {
-                blosum.get_score(code_1, code_2);
+                blosum.read_score(code_1, code_2);
             }
         }
     }
@@ -131,7 +131,7 @@ mod test {
         ];
 
         for (expected, code_1, code_2) in score_cases {
-            assert_eq!(expected, pam.get_score(code_1, code_2))
+            assert_eq!(expected, pam.read_score(code_1, code_2))
         }
     }
 
@@ -140,7 +140,7 @@ mod test {
         let pam = Pam160 {};
         for code_1 in ALL_AAC {
             for code_2 in ALL_AAC {
-                pam.get_score(code_1, code_2);
+                pam.read_score(code_1, code_2);
             }
         }
     }
