@@ -23,8 +23,8 @@ where
 
 /// Scoring schema's gap penalty component
 pub trait GapPenalty {
-    /// The gap penalty is a map $(lenght) \mapto \mathbb(R)$.
-    fn function(&self, lenght: usize) -> f64;
+    /// The gap penalty is a map $(length) \mapto \mathbb(R)$.
+    fn function(&self, length: usize) -> f64;
 
     /// Get the open gap parameter. Be aware that under some gap penalty models
     /// this value can be different from calling f(1).
@@ -41,7 +41,7 @@ where
 {
     fn get_score(&self, code_1: A, code_2: A) -> i8;
 
-    fn get_function(&self, lenght: usize) -> f64;
+    fn get_function(&self, length: usize) -> f64;
 
     fn get_open(&self) -> f64;
 
@@ -67,8 +67,8 @@ where
         self.substitution.read_score(code_1, code_2)
     }
 
-    fn get_function(&self, lenght: usize) -> f64 {
-        self.penalty.function(lenght)
+    fn get_function(&self, length: usize) -> f64 {
+        self.penalty.function(length)
     }
 
     fn get_open(&self) -> f64 {

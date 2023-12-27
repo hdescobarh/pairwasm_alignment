@@ -1,6 +1,6 @@
 //! Gap penalty schemas.
-// A gap is a spaces chain, the lenght is the number of spaces. So,
-// the minimum possible lenght of a gap is 1, then the lenght >= 1
+// A gap is a spaces chain, the length is the number of spaces. So,
+// the minimum possible length of a gap is 1, then the length >= 1
 
 use super::GapPenalty;
 
@@ -8,7 +8,7 @@ use super::GapPenalty;
 type CostType = f64;
 
 /// Implements affine gap model.
-/// f(lenght) = open_cost + extend_cost * lenght, lenght \in Z+
+/// f(length) = open_cost + extend_cost * length, length \in Z+
 pub struct Affine {
     open_cost: CostType,
     extend_cost: CostType,
@@ -24,8 +24,8 @@ impl Affine {
 }
 
 impl GapPenalty for Affine {
-    fn function(&self, lenght: usize) -> CostType {
-        self.open_cost + (self.extend_cost * lenght as CostType)
+    fn function(&self, length: usize) -> CostType {
+        self.open_cost + (self.extend_cost * length as CostType)
     }
     fn open(&self) -> CostType {
         self.open_cost
@@ -36,7 +36,7 @@ impl GapPenalty for Affine {
 }
 
 /// Implements linear gap model.
-/// f(lenght) = extend_cost * lenght, lenght \in Z+.
+/// f(length) = extend_cost * length, length \in Z+.
 /// open_cost is a constant 0.
 pub struct Linear {
     extend_cost: CostType,
@@ -51,8 +51,8 @@ impl Linear {
 }
 
 impl GapPenalty for Linear {
-    fn function(&self, lenght: usize) -> CostType {
-        self.extend_cost * lenght as CostType
+    fn function(&self, length: usize) -> CostType {
+        self.extend_cost * length as CostType
     }
 
     fn open(&self) -> CostType {
