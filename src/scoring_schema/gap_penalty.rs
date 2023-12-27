@@ -4,6 +4,11 @@
 
 use super::GapPenalty;
 
+pub const MIN_OPEN_COST: f32 = 1.0;
+pub const MAX_OPEN_COST: f32 = 100.0;
+pub const MIN_EXTEND_COST: f32 = 0.0;
+pub const MAX_EXTEND_COST: f32 = 10.0;
+
 // This must be a primitive float.
 type CostType = f64;
 
@@ -16,6 +21,8 @@ pub struct Affine {
 
 impl Affine {
     pub fn new(open_cost: f32, extend_cost: f32) -> Self {
+        check_open_cost(&open_cost);
+        check_extend_cost(&extend_cost);
         Self {
             open_cost: open_cost as CostType,
             extend_cost: extend_cost as CostType,
@@ -25,6 +32,7 @@ impl Affine {
 
 impl GapPenalty for Affine {
     fn function(&self, length: usize) -> CostType {
+        check_length(length);
         self.open_cost + (self.extend_cost * length as CostType)
     }
     fn open(&self) -> CostType {
@@ -44,6 +52,7 @@ pub struct Linear {
 
 impl Linear {
     pub fn new(extend_cost: f32) -> Self {
+        check_extend_cost(&extend_cost);
         Self {
             extend_cost: extend_cost as CostType,
         }
@@ -52,6 +61,7 @@ impl Linear {
 
 impl GapPenalty for Linear {
     fn function(&self, length: usize) -> CostType {
+        check_length(length);
         self.extend_cost * length as CostType
     }
 
@@ -61,6 +71,30 @@ impl GapPenalty for Linear {
 
     fn extend(&self) -> CostType {
         self.extend_cost
+    }
+}
+
+fn check_length(length: usize) {
+    if length == 0 {
+        panic!("A length of 0 is not allowed.")
+    }
+}
+
+fn check_open_cost(open_cost: &f32) {
+    if !(MIN_OPEN_COST..=MAX_OPEN_COST).contains(open_cost) {
+        panic!(
+            "Invalid gap open cost ({}). It must be in the closed interval [{}, {}]",
+            open_cost, MIN_OPEN_COST, MAX_OPEN_COST
+        )
+    }
+}
+
+fn check_extend_cost(extend_cost: &f32) {
+    if !(MIN_EXTEND_COST..=MAX_EXTEND_COST).contains(extend_cost) {
+        panic!(
+            "Invalid gap extend cost ({}). It must be in the closed interval [{}, {}]",
+            extend_cost, MIN_EXTEND_COST, MAX_EXTEND_COST
+        )
     }
 }
 
