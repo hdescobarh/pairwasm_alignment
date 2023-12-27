@@ -2,7 +2,9 @@
 // A gap is a spaces chain, the lenght is the number of spaces. So,
 // the minimum possible lenght of a gap is 1, then the lenght >= 1
 
+use super::ErrorKind;
 use super::GapPenalty;
+use super::SchemaError;
 
 // This must be a primitive float.
 type CostType = f64;
@@ -24,8 +26,11 @@ impl Affine {
 }
 
 impl GapPenalty for Affine {
-    fn function(&self, lenght: usize) -> CostType {
-        self.open_cost + (self.extend_cost * lenght as CostType)
+    fn function(&self, lenght: usize) -> Result<CostType, SchemaError> {
+        if lenght == 0 {
+            return Err(SchemaError::new(ErrorKind::InvalidLenght));
+        };
+        Ok(self.open_cost + (self.extend_cost * lenght as CostType))
     }
     fn open(&self) -> CostType {
         self.open_cost
@@ -51,8 +56,11 @@ impl Linear {
 }
 
 impl GapPenalty for Linear {
-    fn function(&self, lenght: usize) -> CostType {
-        self.extend_cost * lenght as CostType
+    fn function(&self, lenght: usize) -> Result<CostType, SchemaError> {
+        if lenght == 0 {
+            return Err(SchemaError::new(ErrorKind::InvalidLenght));
+        }
+        Ok(self.extend_cost * lenght as CostType)
     }
 
     fn open(&self) -> CostType {
@@ -67,4 +75,9 @@ impl GapPenalty for Linear {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn affine() {
+        let penalty = Affine::new(0.5, 10.0);
+    }
 }

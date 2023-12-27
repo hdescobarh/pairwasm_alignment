@@ -24,7 +24,7 @@ where
 /// Scoring schema's gap penalty component
 pub trait GapPenalty {
     /// The gap penalty is a map $(lenght) \mapto \mathbb(R)$.
-    fn function(&self, lenght: usize) -> f64;
+    fn function(&self, lenght: usize) -> Result<f64, SchemaError>;
 
     /// Get the open gap parameter. Be aware that under some gap penalty models
     /// this value can be different from calling f(1).
@@ -41,7 +41,7 @@ where
 {
     fn get_score(&self, code_1: A, code_2: A) -> i8;
 
-    fn get_function(&self, lenght: usize) -> f64;
+    fn get_function(&self, lenght: usize) -> Result<f64, SchemaError>;
 
     fn get_open(&self) -> f64;
 
@@ -67,7 +67,7 @@ where
         self.substitution.read_score(code_1, code_2)
     }
 
-    fn get_function(&self, lenght: usize) -> f64 {
+    fn get_function(&self, lenght: usize) -> Result<f64, SchemaError> {
         self.penalty.function(lenght)
     }
 
@@ -131,5 +131,29 @@ impl AaScoringSchema<Pam160, Linear> {
             substitution: Pam160 {},
             penalty: Linear::new(extend_cost),
         }
+    }
+}
+
+#[non_exhaustive]
+#[derive(Debug)]
+pub enum ErrorKind {
+    InvalidLenght,
+}
+
+#[derive(Debug)]
+pub struct SchemaError {
+    kind: ErrorKind,
+    message: String,
+}
+
+impl SchemaError {
+    fn new(kind: ErrorKind) -> Self {
+        let message: String = match kind {
+            ErrorKind::InvalidLenght => {
+                "Lenght must be equall or bigger than zero.".to_string()
+            }
+        };
+
+        Self { kind, message }
     }
 }
