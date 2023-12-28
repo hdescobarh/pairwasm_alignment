@@ -72,7 +72,7 @@ mod test {
 
     #[test]
     fn check_some_blosum45() {
-        let blosum = Blosum45 {};
+        let blosum = similarity_builder(AaScoringKind::Blosum45);
 
         let score_cases = [
             // Diagonal extremes and mid
@@ -92,7 +92,7 @@ mod test {
 
     #[test]
     fn blosum45_is_complete() {
-        let blosum = Blosum45 {};
+        let blosum = similarity_builder(AaScoringKind::Blosum45);
         for code_1 in ALL_AAC {
             for code_2 in ALL_AAC {
                 blosum.read_score(code_1, code_2);
@@ -102,7 +102,7 @@ mod test {
 
     #[test]
     fn check_some_blosum62() {
-        let blosum = Blosum62 {};
+        let blosum = similarity_builder(AaScoringKind::Blosum62);
         let score_cases = [
             // Diagonal extremes and mid
             (4, Aac::A, Aac::A),
@@ -122,7 +122,7 @@ mod test {
 
     #[test]
     fn blosum62_is_complete() {
-        let blosum = Blosum62 {};
+        let blosum = similarity_builder(AaScoringKind::Blosum62);
         for code_1 in ALL_AAC {
             for code_2 in ALL_AAC {
                 blosum.read_score(code_1, code_2);
@@ -132,7 +132,7 @@ mod test {
 
     #[test]
     fn check_some_pam160() {
-        let pam = Pam160 {};
+        let pam = similarity_builder(AaScoringKind::Pam160);
         let score_cases = [
             // Diagonal extremes and mid
             (2, Aac::A, Aac::A),
@@ -152,7 +152,7 @@ mod test {
 
     #[test]
     fn read_pam160_is_complete() {
-        let pam = Pam160 {};
+        let pam = similarity_builder(AaScoringKind::Pam160);
         for code_1 in ALL_AAC {
             for code_2 in ALL_AAC {
                 pam.read_score(code_1, code_2);
