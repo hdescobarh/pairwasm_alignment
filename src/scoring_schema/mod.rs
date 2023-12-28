@@ -11,6 +11,9 @@ pub mod gap_penalty;
 use crate::bioseq::Aac;
 use crate::utils::AlignmentUnit;
 
+use self::aminoacid_schema::AaScoringKind;
+use self::gap_penalty::PenaltyKind;
+
 type CostType = f32;
 type SimilarityType = i8;
 
@@ -40,9 +43,6 @@ pub trait ScoringSchema<A>
 where
     A: AlignmentUnit,
 {
-    type Similarity;
-    type GapPenalty;
-
     fn get_score(&self, code_1: A, code_2: A) -> SimilarityType;
 
     fn get_function(&self, length: usize) -> CostType;
@@ -50,28 +50,27 @@ where
     fn get_open(&self) -> CostType;
 
     fn get_extend(&self) -> CostType;
-
-    fn new(similarity_score: Self::Similarity, gap_penalty: Self::GapPenalty) -> Self;
 }
 
 /// Amino acid sequence scoring schema
-pub struct AaScoringSchema<S, P>
-where
-    P: GapPenalty,
-    S: Similarity<Aac>,
-{
-    substitution: S,
-    penalty: P,
+
+pub struct AaScoringSchema {
+    substitution: Box<dyn Similarity<Aac>>,
+    penalty: Box<dyn GapPenalty>,
 }
 
-impl<S, P> ScoringSchema<Aac> for AaScoringSchema<S, P>
-where
-    P: GapPenalty,
-    S: Similarity<Aac>,
-{
-    type Similarity = S;
-    type GapPenalty = P;
+impl AaScoringSchema {
+    pub fn new(score_kind: AaScoringKind, penalty_kind: PenaltyKind) -> Self {
+        let substitution = aminoacid_schema::similarity_builder(score_kind);
+        let penalty = gap_penalty::penalty_builder(penalty_kind);
+        Self {
+            substitution,
+            penalty,
+        }
+    }
+}
 
+impl ScoringSchema<Aac> for AaScoringSchema {
     fn get_score(&self, code_1: Aac, code_2: Aac) -> SimilarityType {
         self.substitution.read_score(code_1, code_2)
     }
@@ -85,13 +84,6 @@ where
     }
 
     fn get_extend(&self) -> CostType {
-        self.penalty.open()
-    }
-
-    fn new(similarity_score: S, gap_penalty: P) -> Self {
-        Self {
-            substitution: similarity_score,
-            penalty: gap_penalty,
-        }
+        self.penalty.extend()
     }
 }

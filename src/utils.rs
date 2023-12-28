@@ -13,6 +13,6 @@ pub fn set_panic_hook() {
 /// Flag to denote the minimal units of a sequence.
 pub trait AlignmentUnit
 where
-    Self: Sized + Copy,
+    Self: Copy,
 {
 }

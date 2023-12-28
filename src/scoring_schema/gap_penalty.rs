@@ -10,6 +10,23 @@ pub const MAX_OPEN_COST: CostType = 100.0;
 pub const MIN_EXTEND_COST: CostType = 0.0;
 pub const MAX_EXTEND_COST: CostType = 10.0;
 
+pub enum PenaltyKind {
+    // open_cost: CostType, extend_cost: CostType
+    Affine(CostType, CostType),
+    // extend_cost: CostType
+    Linear(CostType),
+}
+
+/// Penalty constructor
+pub fn penalty_builder(kind: PenaltyKind) -> Box<dyn GapPenalty> {
+    match kind {
+        PenaltyKind::Affine(open_cost, extend_cost) => {
+            Box::new(Affine::new(open_cost, extend_cost))
+        }
+        PenaltyKind::Linear(extend_cost) => Box::new(Linear::new(extend_cost)),
+    }
+}
+
 /// Implements affine gap model.
 /// f(length) = open_cost + extend_cost * length, length \in Z+
 pub struct Affine {
@@ -18,7 +35,7 @@ pub struct Affine {
 }
 
 impl Affine {
-    pub fn new(open_cost: CostType, extend_cost: CostType) -> Self {
+    fn new(open_cost: CostType, extend_cost: CostType) -> Self {
         check_open_cost(&open_cost);
         check_extend_cost(&extend_cost);
         Self {
@@ -49,7 +66,7 @@ pub struct Linear {
 }
 
 impl Linear {
-    pub fn new(extend_cost: CostType) -> Self {
+    fn new(extend_cost: CostType) -> Self {
         check_extend_cost(&extend_cost);
         Self { extend_cost }
     }

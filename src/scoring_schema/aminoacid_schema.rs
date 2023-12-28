@@ -5,6 +5,20 @@ use super::Similarity;
 use super::SimilarityType;
 use crate::bioseq::Aac;
 
+pub enum AaScoringKind {
+    Blosum45,
+    Blosum62,
+    Pam160,
+}
+
+pub fn similarity_builder(kind: AaScoringKind) -> Box<dyn Similarity<Aac>> {
+    match kind {
+        AaScoringKind::Blosum45 => Box::new(Blosum45 {}),
+        AaScoringKind::Blosum62 => Box::new(Blosum62 {}),
+        AaScoringKind::Pam160 => Box::new(Pam160 {}),
+    }
+}
+
 pub struct Blosum45 {}
 
 impl Similarity<Aac> for Blosum45 {
