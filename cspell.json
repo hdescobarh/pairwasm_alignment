@@ -50,12 +50,15 @@
     ],
     // words - list of words to be always considered correct
     "words": [
+        "aminoacid",
         "bijective",
+        "bindgen",
+        "bioseq",
         "BLOSUM",
-        "PAM",
         "clippy",
         "IUPAC",
         "Needleman",
+        "PAM",
         "rustfmt",
         "tamasfe",
         "vadimcn"
