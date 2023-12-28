@@ -119,11 +119,11 @@ mod test {
 
     #[test]
     fn valid_affine() {
-        let gap_model = Affine::new(1.0, 0.5);
+        let gap_model = penalty_builder(PenaltyKind::Affine(1.0, 0.5));
         assert_eq!(6.0, gap_model.function(10));
         assert_eq!(6.0, gap_model.open() + gap_model.extend() * 10.0);
 
-        let gap_model = Affine::new(15.0, 2.0);
+        let gap_model = penalty_builder(PenaltyKind::Affine(15.0, 2.0));
         assert_eq!(21.0, gap_model.function(3));
         assert_eq!(21.0, gap_model.open() + gap_model.extend() * 3.0)
     }
@@ -133,7 +133,7 @@ mod test {
         expected = "Invalid gap open cost (-1). It must be in the closed interval [1, 100]."
     )]
     fn invalid_affine_param_open_negative() {
-        Affine::new(-1.0, 0.5);
+        penalty_builder(PenaltyKind::Affine(-1.0, 0.5));
     }
 
     #[test]
@@ -141,7 +141,7 @@ mod test {
         expected = "Invalid gap open cost (0). It must be in the closed interval [1, 100]."
     )]
     fn invalid_affine_param_open_zero() {
-        Affine::new(0.0, 0.5);
+        penalty_builder(PenaltyKind::Affine(0.0, 0.5));
     }
 
     #[test]
@@ -149,23 +149,23 @@ mod test {
         expected = "Invalid gap extend cost (-0.5). It must be in the closed interval [0, 10]."
     )]
     fn invalid_affine_param_extend_negative() {
-        Affine::new(1.0, -0.5);
+        penalty_builder(PenaltyKind::Affine(1.0, -0.5));
     }
 
     #[test]
     #[should_panic(expected = "Length must be a positive value.")]
     fn invalid_affine_length() {
-        let gap_model = Affine::new(1.0, 0.5);
+        let gap_model = penalty_builder(PenaltyKind::Affine(1.0, 0.5));
         gap_model.function(0);
     }
 
     #[test]
     fn valid_linear() {
-        let gap_model = Linear::new(0.5);
+        let gap_model = penalty_builder(PenaltyKind::Linear(0.5));
         assert_eq!(4.5, gap_model.function(9));
         assert_eq!(4.5, gap_model.open() + gap_model.extend() * 9.0);
 
-        let gap_model = Linear::new(9.0);
+        let gap_model = penalty_builder(PenaltyKind::Linear(9.0));
         assert_eq!(27.0, gap_model.function(3));
         assert_eq!(27.0, gap_model.open() + gap_model.extend() * 3.0)
     }
@@ -175,13 +175,13 @@ mod test {
         expected = "Invalid gap extend cost (-0.5). It must be in the closed interval [0, 10]."
     )]
     fn invalid_linear_param_extend_negative() {
-        Linear::new(-0.5);
+        penalty_builder(PenaltyKind::Linear(-0.5));
     }
 
     #[test]
     #[should_panic(expected = "Length must be a positive value.")]
     fn invalid_linear_length() {
-        let gap_model = Linear::new(7.0);
+        let gap_model = penalty_builder(PenaltyKind::Linear(7.0));
         gap_model.function(0);
     }
 }
