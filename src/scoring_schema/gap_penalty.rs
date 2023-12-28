@@ -22,8 +22,8 @@ impl Affine {
         check_open_cost(&open_cost);
         check_extend_cost(&extend_cost);
         Self {
-            open_cost: open_cost,
-            extend_cost: extend_cost,
+            open_cost,
+            extend_cost,
         }
     }
 }
@@ -51,9 +51,7 @@ pub struct Linear {
 impl Linear {
     pub fn new(extend_cost: CostType) -> Self {
         check_extend_cost(&extend_cost);
-        Self {
-            extend_cost: extend_cost,
-        }
+        Self { extend_cost }
     }
 }
 
@@ -73,15 +71,17 @@ impl GapPenalty for Linear {
 }
 
 fn check_length(length: usize) {
-    if length == 0 {
-        panic!("A length of 0 is not allowed.")
+    // To guard in case of a future implementation changes length type
+    #[allow(clippy::absurd_extreme_comparisons)]
+    if length <= 0 {
+        panic!("Length must be a positive value.")
     }
 }
 
 fn check_open_cost(open_cost: &CostType) {
     if !(MIN_OPEN_COST..=MAX_OPEN_COST).contains(open_cost) {
         panic!(
-            "Invalid gap open cost ({}). It must be in the closed interval [{}, {}]",
+            "Invalid gap open cost ({}). It must be in the closed interval [{}, {}].",
             open_cost, MIN_OPEN_COST, MAX_OPEN_COST
         )
     }
@@ -90,7 +90,7 @@ fn check_open_cost(open_cost: &CostType) {
 fn check_extend_cost(extend_cost: &CostType) {
     if !(MIN_EXTEND_COST..=MAX_EXTEND_COST).contains(extend_cost) {
         panic!(
-            "Invalid gap extend cost ({}). It must be in the closed interval [{}, {}]",
+            "Invalid gap extend cost ({}). It must be in the closed interval [{}, {}].",
             extend_cost, MIN_EXTEND_COST, MAX_EXTEND_COST
         )
     }
@@ -99,4 +99,72 @@ fn check_extend_cost(extend_cost: &CostType) {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn valid_affine() {
+        let gap_model = Affine::new(1.0, 0.5);
+        assert_eq!(6.0, gap_model.function(10));
+        assert_eq!(6.0, gap_model.open() + gap_model.extend() * 10.0);
+
+        let gap_model = Affine::new(15.0, 2.0);
+        assert_eq!(21.0, gap_model.function(3));
+        assert_eq!(21.0, gap_model.open() + gap_model.extend() * 3.0)
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Invalid gap open cost (-1). It must be in the closed interval [1, 100]."
+    )]
+    fn invalid_affine_param_open_negative() {
+        Affine::new(-1.0, 0.5);
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Invalid gap open cost (0). It must be in the closed interval [1, 100]."
+    )]
+    fn invalid_affine_param_open_zero() {
+        Affine::new(0.0, 0.5);
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Invalid gap extend cost (-0.5). It must be in the closed interval [0, 10]."
+    )]
+    fn invalid_affine_param_extend_negative() {
+        Affine::new(1.0, -0.5);
+    }
+
+    #[test]
+    #[should_panic(expected = "Length must be a positive value.")]
+    fn invalid_affine_length() {
+        let gap_model = Affine::new(1.0, 0.5);
+        gap_model.function(0);
+    }
+
+    #[test]
+    fn valid_linear() {
+        let gap_model = Linear::new(0.5);
+        assert_eq!(4.5, gap_model.function(9));
+        assert_eq!(4.5, gap_model.open() + gap_model.extend() * 9.0);
+
+        let gap_model = Linear::new(9.0);
+        assert_eq!(27.0, gap_model.function(3));
+        assert_eq!(27.0, gap_model.open() + gap_model.extend() * 3.0)
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Invalid gap extend cost (-0.5). It must be in the closed interval [0, 10]."
+    )]
+    fn invalid_linear_param_extend_negative() {
+        Linear::new(-0.5);
+    }
+
+    #[test]
+    #[should_panic(expected = "Length must be a positive value.")]
+    fn invalid_linear_length() {
+        let gap_model = Linear::new(7.0);
+        gap_model.function(0);
+    }
 }
