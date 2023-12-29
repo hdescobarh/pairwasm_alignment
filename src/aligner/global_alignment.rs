@@ -44,3 +44,101 @@ impl<'a> NeedlemanWunsch<'a, Aac> {
         }
     }
 }
+
+impl<'a, A> NeedlemanWunsch<'a, A>
+where
+    A: AlignmentUnit,
+{
+    pub fn run(&mut self) {
+        self.initialize();
+        self.solve_subproblems();
+    }
+    fn initialize(&mut self) {
+        self.matrix[[0, 0]] = BackTrack::D(0.0);
+        let [rows, cols] = self.matrix.dim();
+
+        for i in 1..rows {
+            self.matrix[[i, 0]] = BackTrack::T(self.scoring_schema.get_function(i));
+        }
+
+        for j in 1..cols {
+            self.matrix[[0, j]] = BackTrack::L(self.scoring_schema.get_function(j));
+        }
+    }
+
+    fn solve_subproblems(&mut self) {
+        let [rows, cols] = self.matrix.dim();
+        for i in 1..rows {
+            for j in 1..cols {
+                let diagonal = self.diagonal_score(i, j);
+                let top = self.top_score(i, j);
+                let left = self.left_score(i, j);
+                self.matrix[[i, j]] = BackTrack::make_backtrack(diagonal, top, left);
+            }
+        }
+    }
+
+    fn read_sequences(&self, i: usize, j: usize) -> [A; 2] {
+        let left_alignable: A = self.sequence_left.seq()[i - 1];
+        let top_alignable: A = self.sequence_top.seq()[j - 1];
+        [left_alignable, top_alignable]
+    }
+
+    fn diagonal_score(&self, i: usize, j: usize) -> f32 {
+        let [left_alignable, top_alignable] = self.read_sequences(i, j);
+        let score_ij = self.scoring_schema.get_score(left_alignable, top_alignable);
+        let value = match self.matrix[[i - 1, j - 1]] {
+            BackTrack::T(v) => v,
+            BackTrack::D(v) => v,
+            BackTrack::L(v) => v,
+            BackTrack::DT(v) => v,
+            BackTrack::DL(v) => v,
+            BackTrack::TL(v) => v,
+            BackTrack::All(v) => v,
+            BackTrack::Empty => {
+                panic!("This must be unreachable.Check the transversal order.")
+            }
+        };
+        value + score_ij as f32
+    }
+
+    fn top_score(&self, i: usize, j: usize) -> f32 {
+        // i-1, j
+        match self.matrix[[i - 1, j]] {
+            // top_gap + top_gap is an extension
+            BackTrack::T(v) => v - self.scoring_schema.get_extend(),
+            // not(top_gap) + top_gap is and opening
+            BackTrack::D(v) => v - self.scoring_schema.get_function(1),
+            BackTrack::L(v) => v - self.scoring_schema.get_function(1),
+            BackTrack::DL(v) => v - self.scoring_schema.get_function(1),
+            // Max(v - extend_gap, v - add_new_gap) = v - extend_gap
+            // because extend_gap <= add_new_gap
+            BackTrack::DT(v) => v - self.scoring_schema.get_extend(),
+            BackTrack::TL(v) => v - self.scoring_schema.get_extend(),
+            BackTrack::All(v) => v - self.scoring_schema.get_extend(),
+            BackTrack::Empty => {
+                panic!("This must be unreachable.Check the transversal order.")
+            }
+        }
+    }
+
+    fn left_score(&self, i: usize, j: usize) -> f32 {
+        // i, j-1
+        match self.matrix[[i, j - 1]] {
+            // left_gap + left_gap is and extension
+            BackTrack::L(v) => v - self.scoring_schema.get_extend(),
+            // not(left_gap) + left_gap is a new gap
+            BackTrack::T(v) => v - self.scoring_schema.get_function(1),
+            BackTrack::D(v) => v - self.scoring_schema.get_function(1),
+            BackTrack::DT(v) => v - self.scoring_schema.get_function(1),
+            // Max(v - extend_gap, v - add_new_gap) = v - extend_gap
+            // because extend_gap <= add_new_gap
+            BackTrack::DL(v) => v - self.scoring_schema.get_extend(),
+            BackTrack::TL(v) => v - self.scoring_schema.get_extend(),
+            BackTrack::All(v) => v - self.scoring_schema.get_extend(),
+            BackTrack::Empty => {
+                panic!("This must be unreachable.Check the transversal order.")
+            }
+        }
+    }
+}
