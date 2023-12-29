@@ -2,6 +2,7 @@
 
 /// Represent values for backtracking
 #[derive(Clone)]
+#[cfg_attr(test, derive(PartialEq, Debug))]
 pub enum BackTrack {
     /// Used for initialize collections
     Empty,
@@ -23,19 +24,18 @@ pub enum BackTrack {
 
 impl BackTrack {
     /// generate the back track direction from the scores
-    pub fn make_backtrack(diagonal: f32, top: f32, left: f32) -> BackTrack {
-        let max_score = [top, diagonal, left].into_iter().reduce(f32::min).unwrap();
+    pub fn make_backtrack(top: f32, diagonal: f32, left: f32) -> BackTrack {
+        let max_score = [top, diagonal, left].into_iter().reduce(f32::max).unwrap();
         let mut which_back: u8 = 0b000;
         for (value, indicator) in [(top, 0b001), (diagonal, 0b010), (left, 0b100)] {
             if value == max_score {
-                which_back &= indicator
+                which_back |= indicator
             }
         }
 
         // [Empty, Top, Diag., Left, Diag-top, Diag-left, Top-left, Any]
         // [0b000, 0b001, 0b010, 0b100, 0b011, 0b110, 0b101, 0b111]
         match which_back {
-            b'\x00' => BackTrack::Empty,
             b'\x01' => BackTrack::T(max_score),
             b'\x02' => BackTrack::D(max_score),
             b'\x04' => BackTrack::L(max_score),
@@ -43,7 +43,52 @@ impl BackTrack {
             b'\x06' => BackTrack::DL(max_score),
             b'\x05' => BackTrack::TL(max_score),
             b'\x07' => BackTrack::All(max_score),
-            _ => panic!("This must be unreachable. Check match variants."),
+            _ => panic!(
+                "This must be unreachable. Check match variants.\
+             Max score: {}. Back Value {}",
+                max_score, which_back
+            ),
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::BackTrack;
+
+    #[test]
+    fn backtrack_from_scores() {
+        // top i
+        let test_cases = [
+            (BackTrack::T(1.0), [1.0, 0.0, 0.0]),
+            (BackTrack::T(1.0), [1.0, -1.0, 0.0]),
+            (BackTrack::T(1.0), [1.0, 0.0, -1.0]),
+            (BackTrack::D(1.0), [0.0, 1.0, 0.0]),
+            (BackTrack::D(1.0), [-1.0, 1.0, 0.0]),
+            (BackTrack::D(1.0), [0.0, 1.0, -1.0]),
+            (BackTrack::L(1.0), [0.0, 0.0, 1.0]),
+            (BackTrack::L(1.0), [-1.0, 0.0, 1.0]),
+            (BackTrack::L(1.0), [0.0, -1.0, 1.0]),
+            (BackTrack::DT(1.0), [1.0, 1.0, 0.0]),
+            (BackTrack::DT(1.0), [1.0, 1.0, -1.0]),
+            (BackTrack::DL(1.0), [0.0, 1.0, 1.0]),
+            (BackTrack::DL(1.0), [-1.0, 1.0, 1.0]),
+            (BackTrack::TL(1.0), [1.0, 0.0, 1.0]),
+            (BackTrack::TL(1.0), [1.0, -1.0, 1.0]),
+            (BackTrack::All(1.0), [1.0, 1.0, 1.0]),
+            (BackTrack::All(0.0), [0.0, 0.0, 0.0]),
+            (BackTrack::All(-1.0), [-1.0, -1.0, -1.0]),
+        ];
+
+        for (expected, [top, diagonal, left]) in test_cases {
+            assert_eq!(
+                expected,
+                BackTrack::make_backtrack(top, diagonal, left),
+                "Failed at case [{},{},{}]",
+                top,
+                diagonal,
+                left
+            )
         }
     }
 }
