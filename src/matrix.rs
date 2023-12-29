@@ -1,5 +1,6 @@
 //! Matricial data structures.
 
+use std::fmt::Debug;
 use std::ops::{Index, IndexMut};
 
 /// Representation of a Matrix (aᵢⱼ), 0 ≤ i < rows , 0 ≤ j < cols.
@@ -225,6 +226,24 @@ impl<T: std::clone::Clone> IndexMut<[usize; 2]> for Matrix<T> {
             Err(e) => panic!("{:?}", e),
         };
         &mut self.container[i]
+    }
+}
+
+#[cfg(test)]
+impl<T> Debug for Matrix<T>
+where
+    T: Debug + Clone,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        //f.debug_list().entries(&self.container).finish()
+        //f.write_fmt(format_args!(""))
+        let mut formatted = String::new();
+        for i in 0..self.rows {
+            let start = i * self.cols;
+            let end = (i + 1) * self.cols;
+            formatted.push_str(&format!("{:?}\n", &self.container[start..end]))
+        }
+        f.write_fmt(format_args!("[{}]", formatted))
     }
 }
 
