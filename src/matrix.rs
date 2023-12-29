@@ -14,6 +14,13 @@ pub struct Matrix<T> {
     container: Vec<T>,
 }
 
+impl<T> Matrix<T> {
+    /// Returns the Matrix dimension
+    pub fn dim(&self) -> [usize; 2] {
+        [self.rows, self.cols]
+    }
+}
+
 impl<T: std::clone::Clone> Matrix<T> {
     /// Creates an empty matrix of dimension rows * cols.
     /// Be aware that trying to access to index a[[i, j]] without initializing it first will panic.
