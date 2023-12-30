@@ -247,6 +247,25 @@ where
     }
 }
 
+#[cfg(test)]
+impl<T> Matrix<T> {
+    pub fn from_vec(container: Vec<T>, rows: usize, cols: usize) -> Self {
+        if container.len() != rows * cols {
+            panic!(
+                "Verify vector length. Expected a length of {} but received {}",
+                rows * cols,
+                container.len()
+            );
+        }
+
+        Self {
+            rows,
+            cols,
+            container,
+        }
+    }
+}
+
 #[derive(Debug)]
 /// Error type for matricial operations.
 pub struct MatError {
