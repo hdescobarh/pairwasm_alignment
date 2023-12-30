@@ -1,5 +1,8 @@
 //! common data structures and functions used for multiple align algorithms
 
+use crate::matrix::Matrix;
+use std::mem::replace;
+
 /// Represent values for backtracking
 #[derive(Clone)]
 #[cfg_attr(test, derive(PartialEq, Debug))]
@@ -49,6 +52,79 @@ impl BackTrack {
                 max_score, which_back
             ),
         }
+    }
+
+    /// from an entry matrix cell tracks all the paths
+    pub fn bakctracking(
+        matrix: &Matrix<BackTrack>,
+        init_row: usize,
+        init_col: usize,
+    ) -> Vec<Vec<[usize; 2]>> {
+        let mut paths: Vec<Vec<[usize; 2]>> = Vec::new();
+        let mut pending_stack: Vec<Vec<[usize; 2]>> = Vec::new();
+        let current_path: Vec<[usize; 2]> = vec![[init_row, init_col]];
+        Self::next_node(matrix, current_path, &mut pending_stack, &mut paths);
+        paths
+    }
+
+    fn next_node(
+        matrix: &Matrix<BackTrack>,
+        mut current_path: Vec<[usize; 2]>,
+        pending_stack: &mut Vec<Vec<[usize; 2]>>,
+        paths: &mut Vec<Vec<[usize; 2]>>,
+    ) {
+        let [row, col] = *current_path.last().unwrap();
+        if (row == 0) && (col == 0) {
+            match pending_stack.pop() {
+                Some(next_path) => {
+                    let old_path = replace(&mut current_path, next_path);
+                    paths.push(old_path);
+                }
+                None => {
+                    paths.push(current_path);
+                    return;
+                }
+            }
+        } else {
+            match matrix[[row, col]] {
+                BackTrack::T(_) => current_path.push([row - 1, col]),
+                BackTrack::D(_) => current_path.push([row - 1, col - 1]),
+                BackTrack::L(_) => current_path.push([row, col - 1]),
+                BackTrack::DT(_) => {
+                    let mut branch = current_path.clone();
+                    branch.push([row - 1, col]);
+                    pending_stack.push(branch);
+                    current_path.push([row - 1, col - 1]);
+                }
+                BackTrack::DL(_) => {
+                    let mut branch = current_path.clone();
+                    branch.push([row, col - 1]);
+                    pending_stack.push(branch);
+                    current_path.push([row - 1, col - 1]);
+                }
+                BackTrack::TL(_) => {
+                    let mut branch = current_path.clone();
+                    branch.push([row, col - 1]);
+                    pending_stack.push(branch);
+                    current_path.push([row - 1, col]);
+                }
+                BackTrack::All(_) => {
+                    let mut branch = current_path.clone();
+                    branch.push([row - 1, col]);
+                    pending_stack.push(branch);
+
+                    let mut branch = current_path.clone();
+                    branch.push([row, col - 1]);
+                    pending_stack.push(branch);
+
+                    current_path.push([row - 1, col - 1])
+                }
+                BackTrack::Empty => panic!(
+                    "This must be unreachable. Check all matrix cells are being visited."
+                ),
+            };
+        };
+        Self::next_node(matrix, current_path, pending_stack, paths);
     }
 }
 
