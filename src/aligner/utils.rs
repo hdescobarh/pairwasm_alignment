@@ -55,7 +55,7 @@ impl BackTrack {
     }
 
     /// from an entry matrix cell tracks all the paths
-    pub fn bakctracking(
+    pub fn backtracking(
         matrix: &Matrix<BackTrack>,
         init_row: usize,
         init_col: usize,
@@ -63,11 +63,11 @@ impl BackTrack {
         let mut paths: Vec<Vec<[usize; 2]>> = Vec::new();
         let mut pending_stack: Vec<Vec<[usize; 2]>> = Vec::new();
         let current_path: Vec<[usize; 2]> = vec![[init_row, init_col]];
-        Self::next_node(matrix, current_path, &mut pending_stack, &mut paths);
+        Self::find_paths(matrix, current_path, &mut pending_stack, &mut paths);
         paths
     }
 
-    fn next_node(
+    fn find_paths(
         matrix: &Matrix<BackTrack>,
         mut current_path: Vec<[usize; 2]>,
         pending_stack: &mut Vec<Vec<[usize; 2]>>,
@@ -124,7 +124,7 @@ impl BackTrack {
                 ),
             };
         };
-        Self::next_node(matrix, current_path, pending_stack, paths);
+        Self::find_paths(matrix, current_path, pending_stack, paths);
     }
 }
 
