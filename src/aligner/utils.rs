@@ -120,7 +120,7 @@ impl BackTrack {
                     current_path.push([row - 1, col - 1])
                 }
                 BackTrack::Empty => panic!(
-                    "This must be unreachable. Check all matrix cells are being visited."
+                    "Empty at [{row}, {col}]. Any implementation must remove all Empty from the matrix."
                 ),
             };
         };
@@ -131,6 +131,7 @@ impl BackTrack {
 #[cfg(test)]
 mod test {
     use super::BackTrack;
+    use crate::matrix::Matrix;
 
     #[test]
     fn backtrack_from_scores() {
@@ -166,5 +167,71 @@ mod test {
                 left
             )
         }
+    }
+
+    #[test]
+    fn matrix_backtrack_one_path_any_start() {
+        let container = vec![
+            BackTrack::D(0.0),
+            BackTrack::L(0.0),
+            BackTrack::L(0.0),
+            BackTrack::L(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+            BackTrack::D(0.0),
+            BackTrack::L(0.0),
+            BackTrack::T(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+            BackTrack::L(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+        ];
+        let matrix = Matrix::from_vec(container, 4, 4);
+
+        let test_cases = [
+            ([3, 3], vec![vec![[3, 3], [2, 2], [1, 1], [0, 0]]]), // start at last cell
+            // start any other cell
+            ([2, 3], vec![vec![[2, 3], [2, 2], [1, 1], [0, 0]]]),
+            ([3, 2], vec![vec![[3, 2], [2, 2], [1, 1], [0, 0]]]),
+        ];
+
+        for (start, expected_path) in test_cases {
+            let [init_row, init_col] = start;
+            let actual_path = BackTrack::backtracking(&matrix, init_row, init_col);
+            assert_eq!(
+                expected_path, actual_path,
+                "Failed with starting cell [{init_row}, {init_col}]."
+            )
+        }
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Empty at [2, 2]. Any implementation must remove all Empty from the matrix."
+    )]
+    fn matrix_backtrack_fails_bad_cell_in_path() {
+        let container = vec![
+            BackTrack::D(0.0),
+            BackTrack::L(0.0),
+            BackTrack::L(0.0),
+            BackTrack::L(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+            BackTrack::D(0.0),
+            BackTrack::L(0.0),
+            BackTrack::T(0.0),
+            BackTrack::T(0.0),
+            BackTrack::Empty,
+            BackTrack::L(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+        ];
+        let matrix = Matrix::from_vec(container, 4, 4);
+        BackTrack::backtracking(&matrix, 3, 3);
     }
 }
