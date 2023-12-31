@@ -182,10 +182,13 @@ where
 
 #[cfg(test)]
 mod test {
-    use std::collections::{HashMap, HashSet};
+    use std::collections::HashSet;
 
-    use super::BackTrack;
-    use crate::matrix::Matrix;
+    use super::{AlignmentSequence, BackTrack};
+    use crate::{
+        bioseq::{Aac, Protein},
+        matrix::Matrix,
+    };
 
     #[test]
     fn backtrack_from_scores() {
@@ -589,5 +592,151 @@ mod test {
             diff_extra,
             diff_missing
         );
+    }
+
+    #[test]
+    fn alignment_sequence_no_gap() {
+        let sequence_left = Protein::new("MVLSPADKT").unwrap();
+        let sequence_top = Protein::new("MVLSGEDKS").unwrap();
+
+        let backtrack_path = vec![
+            [9, 9],
+            [8, 8],
+            [7, 7],
+            [6, 6],
+            [5, 5],
+            [4, 4],
+            [3, 3],
+            [2, 2],
+            [1, 1],
+            [0, 0],
+        ];
+        let expected_alignment = AlignmentSequence {
+            pairs: vec![
+                [Some(Aac::M), Some(Aac::M)],
+                [Some(Aac::V), Some(Aac::V)],
+                [Some(Aac::L), Some(Aac::L)],
+                [Some(Aac::S), Some(Aac::S)],
+                [Some(Aac::P), Some(Aac::G)],
+                [Some(Aac::A), Some(Aac::E)],
+                [Some(Aac::D), Some(Aac::D)],
+                [Some(Aac::K), Some(Aac::K)],
+                [Some(Aac::T), Some(Aac::S)],
+            ],
+        };
+        let actual_alignment =
+            AlignmentSequence::new(backtrack_path, &sequence_left, &sequence_top);
+
+        assert_eq!(expected_alignment.pairs.len(), actual_alignment.pairs.len());
+        for p in 0..expected_alignment.pairs.len() {
+            assert!(
+                (expected_alignment.pairs[p][0] == actual_alignment.pairs[p][0])
+                    && (expected_alignment.pairs[p][1] == actual_alignment.pairs[p][1]),
+                "Error at index {}. Expected: {:?}. Got: {:?}.",
+                p,
+                expected_alignment.pairs,
+                actual_alignment.pairs
+            )
+        }
+    }
+
+    #[test]
+    fn alignment_sequence_left_gap() {
+        let sequence_left = Protein::new("KVGAHAGEYA").unwrap();
+        let sequence_top = Protein::new("KIGGHGAEYGA").unwrap();
+        let backtrack_path = vec![
+            [10, 11],
+            [9, 10],
+            [9, 9],
+            [8, 8],
+            [7, 7],
+            [6, 6],
+            [5, 5],
+            [4, 4],
+            [3, 3],
+            [2, 2],
+            [1, 1],
+            [0, 0],
+        ];
+
+        let expected_alignment = AlignmentSequence {
+            pairs: vec![
+                [Some(Aac::K), Some(Aac::K)],
+                [Some(Aac::V), Some(Aac::I)],
+                [Some(Aac::G), Some(Aac::G)],
+                [Some(Aac::A), Some(Aac::G)],
+                [Some(Aac::H), Some(Aac::H)],
+                [Some(Aac::A), Some(Aac::G)],
+                [Some(Aac::G), Some(Aac::A)],
+                [Some(Aac::E), Some(Aac::E)],
+                [Some(Aac::Y), Some(Aac::Y)],
+                [None, Some(Aac::G)],
+                [Some(Aac::A), Some(Aac::A)],
+            ],
+        };
+        let actual_alignment =
+            AlignmentSequence::new(backtrack_path, &sequence_left, &sequence_top);
+
+        assert_eq!(expected_alignment.pairs.len(), actual_alignment.pairs.len());
+        for p in 0..expected_alignment.pairs.len() {
+            assert!(
+                (expected_alignment.pairs[p][0] == actual_alignment.pairs[p][0])
+                    && (expected_alignment.pairs[p][1] == actual_alignment.pairs[p][1]),
+                "Error at index {}. Expected: {:?}. Got: {:?}.",
+                p,
+                expected_alignment.pairs,
+                actual_alignment.pairs
+            )
+        }
+    }
+
+    #[test]
+    fn alignment_sequence_top_gap() {
+        let sequence_left = Protein::new("KIGGHGAEYGA").unwrap();
+        let sequence_top = Protein::new("KVGAHAGEYA").unwrap();
+        let backtrack_path = vec![
+            [11, 10],
+            [10, 9],
+            [9, 9],
+            [8, 8],
+            [7, 7],
+            [6, 6],
+            [5, 5],
+            [4, 4],
+            [3, 3],
+            [2, 2],
+            [1, 1],
+            [0, 0],
+        ];
+
+        let expected_alignment = AlignmentSequence {
+            pairs: vec![
+                [Some(Aac::K), Some(Aac::K)],
+                [Some(Aac::I), Some(Aac::V)],
+                [Some(Aac::G), Some(Aac::G)],
+                [Some(Aac::G), Some(Aac::A)],
+                [Some(Aac::H), Some(Aac::H)],
+                [Some(Aac::G), Some(Aac::A)],
+                [Some(Aac::A), Some(Aac::G)],
+                [Some(Aac::E), Some(Aac::E)],
+                [Some(Aac::Y), Some(Aac::Y)],
+                [Some(Aac::G), None],
+                [Some(Aac::A), Some(Aac::A)],
+            ],
+        };
+        let actual_alignment =
+            AlignmentSequence::new(backtrack_path, &sequence_left, &sequence_top);
+
+        assert_eq!(expected_alignment.pairs.len(), actual_alignment.pairs.len());
+        for p in 0..expected_alignment.pairs.len() {
+            assert!(
+                (expected_alignment.pairs[p][0] == actual_alignment.pairs[p][0])
+                    && (expected_alignment.pairs[p][1] == actual_alignment.pairs[p][1]),
+                "Error at index {}. Expected: {:?}. Got: {:?}.",
+                p,
+                expected_alignment.pairs,
+                actual_alignment.pairs
+            )
+        }
     }
 }
