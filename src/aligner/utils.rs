@@ -143,8 +143,8 @@ where
     pub fn new(
         // remember this is shifted: [i, j] means left.seq[i-1] and top.seq[j-1]
         backtrack_path: Vec<[usize; 2]>,
-        sequence_left: &impl HasSequence<A>,
-        sequence_top: &impl HasSequence<A>,
+        sequence_left: &(impl HasSequence<A> + ?Sized),
+        sequence_top: &(impl HasSequence<A> + ?Sized),
     ) -> Self
     where
         A: AlignmentUnit,

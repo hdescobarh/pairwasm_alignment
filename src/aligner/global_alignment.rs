@@ -1,5 +1,5 @@
 // The original Needleman-Wunsch uses a linear gap penalty
-use super::utils::BackTrack;
+use super::utils::{AlignmentSequence, BackTrack};
 use crate::bioseq::{Aac, HasSequence};
 use crate::matrix::Matrix;
 use crate::scoring_schema::aminoacid_schema::AaScoringKind;
@@ -49,9 +49,23 @@ impl<'a, A> NeedlemanWunsch<'a, A>
 where
     A: AlignmentUnit,
 {
-    pub fn run(&mut self) {
+    pub fn run(&mut self) -> Vec<AlignmentSequence<A>> {
         self.initialize();
         self.solve_subproblems();
+        let [row_dim, col_dim] = self.matrix.dim();
+        let [init_row, init_col] = [row_dim - 1, col_dim - 1];
+        let all_paths = BackTrack::backtracking(&self.matrix, init_row, init_col);
+        let mut alignments: Vec<AlignmentSequence<A>> =
+            Vec::with_capacity(all_paths.len());
+        for backtrack_path in all_paths {
+            let new_alignment = AlignmentSequence::new(
+                backtrack_path,
+                self.sequence_left,
+                self.sequence_top,
+            );
+            alignments.push(new_alignment);
+        }
+        alignments
     }
     fn initialize(&mut self) {
         self.matrix[[0, 0]] = BackTrack::D(0.0);
@@ -73,7 +87,7 @@ where
                 let diagonal = self.diagonal_score(i, j);
                 let top = self.top_score(i, j);
                 let left = self.left_score(i, j);
-                self.matrix[[i, j]] = BackTrack::make_backtrack(diagonal, top, left);
+                self.matrix[[i, j]] = BackTrack::make_backtrack(top, diagonal, left);
             }
         }
     }
@@ -111,8 +125,8 @@ where
             BackTrack::D(v) => v - self.scoring_schema.get_function(1),
             BackTrack::L(v) => v - self.scoring_schema.get_function(1),
             BackTrack::DL(v) => v - self.scoring_schema.get_function(1),
-            // Max(v - extend_gap, v - add_new_gap) = v - extend_gap
-            // because extend_gap <= add_new_gap
+            // Max(v - extend_existing_gap, v - add_new_gap) = v - extend_gap
+            // because extend_existing_gap <= add_new_gap
             BackTrack::DT(v) => v - self.scoring_schema.get_extend(),
             BackTrack::TL(v) => v - self.scoring_schema.get_extend(),
             BackTrack::All(v) => v - self.scoring_schema.get_extend(),
@@ -131,8 +145,8 @@ where
             BackTrack::T(v) => v - self.scoring_schema.get_function(1),
             BackTrack::D(v) => v - self.scoring_schema.get_function(1),
             BackTrack::DT(v) => v - self.scoring_schema.get_function(1),
-            // Max(v - extend_gap, v - add_new_gap) = v - extend_gap
-            // because extend_gap <= add_new_gap
+            // Max(v - extend_existing_gap, v - add_new_gap) = v - extend_gap
+            // because extend_existing_gap <= add_new_gap
             BackTrack::DL(v) => v - self.scoring_schema.get_extend(),
             BackTrack::TL(v) => v - self.scoring_schema.get_extend(),
             BackTrack::All(v) => v - self.scoring_schema.get_extend(),
