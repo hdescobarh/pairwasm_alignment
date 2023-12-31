@@ -110,11 +110,11 @@ impl BackTrack {
                 }
                 BackTrack::All(_) => {
                     let mut branch = current_path.clone();
-                    branch.push([row - 1, col]);
+                    branch.push([row, col - 1]);
                     pending_stack.push(branch);
 
                     let mut branch = current_path.clone();
-                    branch.push([row, col - 1]);
+                    branch.push([row - 1, col]);
                     pending_stack.push(branch);
 
                     current_path.push([row - 1, col - 1])
@@ -130,6 +130,8 @@ impl BackTrack {
 
 #[cfg(test)]
 mod test {
+    use std::collections::{HashMap, HashSet};
+
     use super::BackTrack;
     use crate::matrix::Matrix;
 
@@ -233,5 +235,307 @@ mod test {
         ];
         let matrix = Matrix::from_vec(container, 4, 4);
         BackTrack::backtracking(&matrix, 3, 3);
+    }
+
+    #[test]
+    fn matrix_backtrack_multiple_paths() {
+        let test_cases = [
+            (
+                vec![
+                    BackTrack::D(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::DT(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                ],
+                HashSet::from([
+                    vec![
+                        [6, 3],
+                        [5, 2],
+                        [4, 1],
+                        [4, 0],
+                        [3, 0],
+                        [2, 0],
+                        [1, 0],
+                        [0, 0],
+                    ],
+                    vec![[6, 3], [5, 2], [4, 2], [3, 2], [2, 2], [1, 1], [0, 0]],
+                ]),
+            ),
+            (
+                vec![
+                    BackTrack::D(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::DL(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::DL(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                ],
+                HashSet::from([
+                    vec![[6, 3], [5, 2], [4, 1], [3, 1], [2, 1], [1, 0], [0, 0]],
+                    vec![
+                        [6, 3],
+                        [5, 2],
+                        [5, 1],
+                        [4, 0],
+                        [3, 0],
+                        [2, 0],
+                        [1, 0],
+                        [0, 0],
+                    ],
+                ]),
+            ),
+            (
+                vec![
+                    BackTrack::D(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::TL(0.0),
+                ],
+                HashSet::from([
+                    vec![
+                        [6, 3],
+                        [5, 3],
+                        [4, 3],
+                        [3, 2],
+                        [2, 1],
+                        [2, 0],
+                        [1, 0],
+                        [0, 0],
+                    ],
+                    vec![
+                        [6, 3],
+                        [6, 2],
+                        [5, 1],
+                        [4, 1],
+                        [3, 0],
+                        [2, 0],
+                        [1, 0],
+                        [0, 0],
+                    ],
+                ]),
+            ),
+            (
+                vec![
+                    BackTrack::D(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::L(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::All(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::T(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                    BackTrack::D(0.0),
+                ],
+                HashSet::from([
+                    vec![[6, 3], [5, 2], [4, 1], [3, 1], [2, 0], [1, 0], [0, 0]],
+                    vec![[6, 3], [5, 2], [4, 2], [3, 2], [2, 2], [1, 1], [0, 0]],
+                    vec![
+                        [6, 3],
+                        [5, 2],
+                        [5, 1],
+                        [4, 0],
+                        [3, 0],
+                        [2, 0],
+                        [1, 0],
+                        [0, 0],
+                    ],
+                ]),
+            ),
+        ];
+
+        let mut counter = 0;
+        for (container, expected_paths) in test_cases {
+            counter += 1;
+            let rows = 7;
+            let cols = 4;
+            let matrix = Matrix::from_vec(container, rows, cols);
+            let [init_row, init_col] = [rows - 1, cols - 1];
+            let actual_paths: HashSet<Vec<[usize; 2]>> =
+                BackTrack::backtracking(&matrix, init_row, init_col)
+                    .into_iter()
+                    .collect();
+
+            // Didn't missed any path
+            let diff_missing: HashSet<_> =
+                expected_paths.difference(&actual_paths).collect();
+            // Didn't get an invalid path
+            let diff_extra: HashSet<_> =
+                actual_paths.difference(&expected_paths).collect();
+
+            assert!(
+                diff_missing.is_empty() && diff_extra.is_empty(),
+                "Error at test case {}.\n- Extra paths: {:?}.\n- Missing paths: {:?}.",
+                counter,
+                diff_extra,
+                diff_missing
+            );
+        }
+    }
+    #[test]
+    fn matrix_backtrack_nested_multiple_paths() {
+        let container = vec![
+            BackTrack::D(0.0),
+            BackTrack::L(0.0),
+            BackTrack::L(0.0),
+            BackTrack::L(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+            BackTrack::D(0.0),
+            BackTrack::D(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+            BackTrack::T(0.0),
+            BackTrack::L(0.0),
+            BackTrack::T(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+            BackTrack::T(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+            BackTrack::L(0.0),
+            BackTrack::DL(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+            BackTrack::T(0.0),
+            BackTrack::T(0.0),
+            BackTrack::T(0.0),
+            BackTrack::D(0.0),
+            BackTrack::L(0.0),
+            BackTrack::TL(0.0),
+        ];
+
+        let expected_paths = HashSet::from([
+            vec![[6, 3], [5, 3], [4, 3], [3, 2], [2, 1], [1, 0], [0, 0]],
+            vec![
+                [6, 3],
+                [5, 3],
+                [4, 3],
+                [4, 2],
+                [4, 1],
+                [3, 0],
+                [2, 0],
+                [1, 0],
+                [0, 0],
+            ],
+            vec![
+                [6, 3],
+                [6, 2],
+                [6, 1],
+                [5, 0],
+                [4, 0],
+                [3, 0],
+                [2, 0],
+                [1, 0],
+                [0, 0],
+            ],
+        ]);
+
+        let matrix = Matrix::from_vec(container, 7, 4);
+        let [init_row, init_col] = [6, 3];
+        let actual_path: HashSet<Vec<[usize; 2]>> =
+            BackTrack::backtracking(&matrix, init_row, init_col)
+                .into_iter()
+                .collect();
+
+        // Didn't missed any path
+        let diff_missing: HashSet<_> = expected_paths.difference(&actual_path).collect();
+        // Didn't get an invalid path
+        let diff_extra: HashSet<_> = actual_path.difference(&expected_paths).collect();
+
+        assert!(
+            diff_missing.is_empty() && diff_extra.is_empty(),
+            "- Extra paths: {:?}.\n- Missing paths: {:?}.",
+            diff_extra,
+            diff_missing
+        );
     }
 }
