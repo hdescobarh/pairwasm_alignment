@@ -1,6 +1,6 @@
 //! common data structures and functions used for multiple align algorithms
 
-use crate::matrix::Matrix;
+use crate::{bioseq::HasSequence, matrix::Matrix, utils::AlignmentUnit};
 use std::mem::replace;
 
 /// Represent values for backtracking
@@ -125,6 +125,58 @@ impl BackTrack {
             };
         };
         Self::find_paths(matrix, current_path, pending_stack, paths);
+    }
+}
+
+/// Represents a single alignment
+pub struct AlignmentSequence<A>
+where
+    A: AlignmentUnit,
+{
+    pairs: Vec<[Option<A>; 2]>,
+}
+
+impl<A> AlignmentSequence<A>
+where
+    A: AlignmentUnit,
+{
+    pub fn new(
+        // remember this is shifted: [i, j] means left.seq[i-1] and top.seq[j-1]
+        backtrack_path: Vec<[usize; 2]>,
+        sequence_left: &impl HasSequence<A>,
+        sequence_top: &impl HasSequence<A>,
+    ) -> Self
+    where
+        A: AlignmentUnit,
+    {
+        let mut pairs: Vec<[Option<A>; 2]> = Vec::with_capacity(backtrack_path.len());
+
+        for index in (0..backtrack_path.len() - 1).rev() {
+            let [row, col] = backtrack_path[index];
+            let [last_row, last_col] = backtrack_path[index + 1];
+
+            let next = {
+                if row != last_row && col != last_col {
+                    [
+                        Some(sequence_left.seq()[row - 1]),
+                        Some(sequence_top.seq()[col - 1]),
+                    ]
+                } else if row != last_row && col == last_col {
+                    [Some(sequence_left.seq()[row - 1]), None]
+                } else if row == last_row && col != last_col {
+                    [None, Some(sequence_top.seq()[col - 1])]
+                } else {
+                    panic!("This must be unreachable. Does not exist a path such that repeats indices.")
+                }
+            };
+            pairs.push(next)
+        }
+
+        Self { pairs }
+    }
+
+    pub fn read(&self) -> &Vec<[Option<A>; 2]> {
+        &self.pairs
     }
 }
 
