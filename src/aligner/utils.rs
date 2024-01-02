@@ -1,6 +1,9 @@
 //! common data structures and functions used for multiple align algorithms
 
-use crate::{bioseq::HasSequence, matrix::Matrix, utils::AlignmentUnit};
+use crate::{
+    bioseq::HasSequence, matrix::Matrix, scoring_schema::ScoringSchema,
+    utils::AlignmentUnit,
+};
 use std::mem::replace;
 
 /// Represent values for backtracking
@@ -177,6 +180,89 @@ where
 
     pub fn read(&self) -> &Vec<[Option<A>; 2]> {
         &self.pairs
+    }
+}
+
+pub trait TransversalOrder<A>
+where
+    A: AlignmentUnit,
+{
+    fn diagonal_score(
+        sequence_left: &(impl HasSequence<A> + ?Sized),
+        sequence_top: &(impl HasSequence<A> + ?Sized),
+        scoring_schema: &Box<dyn ScoringSchema<A>>,
+        matrix: &Matrix<BackTrack>,
+        i: usize,
+        j: usize,
+    ) -> f32 {
+        // Read the sequences i,j element. Remember the Matrix has (n+1)(m+1) elements, with the
+        // extra row and colum at the start.
+        let left_alignable: A = sequence_left.seq()[i - 1];
+        let top_alignable: A = sequence_top.seq()[j - 1];
+        let score_ij = scoring_schema.get_score(left_alignable, top_alignable);
+        let value = match matrix[[i - 1, j - 1]] {
+            BackTrack::T(v) => v,
+            BackTrack::D(v) => v,
+            BackTrack::L(v) => v,
+            BackTrack::DT(v) => v,
+            BackTrack::DL(v) => v,
+            BackTrack::TL(v) => v,
+            BackTrack::All(v) => v,
+            BackTrack::Empty => {
+                panic!("This must be unreachable.Check the transversal order.")
+            }
+        };
+        value + score_ij as f32
+    }
+
+    fn top_score(
+        scoring_schema: &Box<dyn ScoringSchema<A>>,
+        matrix: &Matrix<BackTrack>,
+        i: usize,
+        j: usize,
+    ) -> f32 {
+        // i-1, j
+        match matrix[[i - 1, j]] {
+            // top_gap + top_gap is an extension
+            BackTrack::T(v) => v - scoring_schema.get_extend(),
+            // not(top_gap) + top_gap is and opening
+            BackTrack::D(v) => v - scoring_schema.get_function(1),
+            BackTrack::L(v) => v - scoring_schema.get_function(1),
+            BackTrack::DL(v) => v - scoring_schema.get_function(1),
+            // Max(v - extend_existing_gap, v - add_new_gap) = v - extend_gap
+            // because extend_existing_gap <= add_new_gap
+            BackTrack::DT(v) => v - scoring_schema.get_extend(),
+            BackTrack::TL(v) => v - scoring_schema.get_extend(),
+            BackTrack::All(v) => v - scoring_schema.get_extend(),
+            BackTrack::Empty => {
+                panic!("This must be unreachable.Check the transversal order.")
+            }
+        }
+    }
+
+    fn left_score(
+        scoring_schema: &Box<dyn ScoringSchema<A>>,
+        matrix: &Matrix<BackTrack>,
+        i: usize,
+        j: usize,
+    ) -> f32 {
+        // i, j-1
+        match matrix[[i, j - 1]] {
+            // left_gap + left_gap is and extension
+            BackTrack::L(v) => v - scoring_schema.get_extend(),
+            // not(left_gap) + left_gap is a new gap
+            BackTrack::T(v) => v - scoring_schema.get_function(1),
+            BackTrack::D(v) => v - scoring_schema.get_function(1),
+            BackTrack::DT(v) => v - scoring_schema.get_function(1),
+            // Max(v - extend_existing_gap, v - add_new_gap) = v - extend_gap
+            // because extend_existing_gap <= add_new_gap
+            BackTrack::DL(v) => v - scoring_schema.get_extend(),
+            BackTrack::TL(v) => v - scoring_schema.get_extend(),
+            BackTrack::All(v) => v - scoring_schema.get_extend(),
+            BackTrack::Empty => {
+                panic!("This must be unreachable.Check the transversal order.")
+            }
+        }
     }
 }
 
