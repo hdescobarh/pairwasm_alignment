@@ -718,6 +718,110 @@ mod test {
     }
 
     #[test]
+    fn matrix_backtrack_one_path_cutoff() {
+        let container = vec![
+            BackTrack::D(1.0),
+            BackTrack::L(1.0),
+            BackTrack::L(1.0),
+            BackTrack::L(1.0),
+            BackTrack::T(1.0),
+            BackTrack::D(1.0),
+            BackTrack::D(1.0),
+            BackTrack::L(1.0),
+            BackTrack::T(1.0),
+            BackTrack::D(1.0),
+            BackTrack::D(1.0),
+            BackTrack::L(1.0),
+            BackTrack::T(0.0),
+            BackTrack::D(1.0),
+            BackTrack::T(1.0),
+            BackTrack::D(1.0),
+            BackTrack::T(1.0),
+            BackTrack::D(1.0),
+            BackTrack::L(1.0),
+            BackTrack::D(1.0),
+            BackTrack::T(1.0),
+            BackTrack::D(1.0),
+            BackTrack::D(10.0),
+            BackTrack::D(1.0),
+            BackTrack::T(1.0),
+            BackTrack::L(1.0),
+            BackTrack::T(1.0),
+            BackTrack::T(1.0),
+        ];
+        let matrix = Matrix::from_vec(container, 7, 4);
+
+        let [init_row, init_col] = [5, 2];
+        let actual_path = BackTrack::backtracking(&matrix, init_row, init_col, 0.0);
+        let expected_path = vec![vec![[5, 2], [4, 1], [3, 0]]];
+
+        assert_eq!(
+            expected_path, actual_path,
+            "Failed with starting cell [{init_row}, {init_col}]."
+        )
+    }
+
+    #[test]
+    fn matrix_backtrack_multiple_paths_cutoff() {
+        let container = vec![
+            BackTrack::D(1.0),
+            BackTrack::L(0.0),
+            BackTrack::L(1.0),
+            BackTrack::L(1.0),
+            BackTrack::T(0.0),
+            BackTrack::D(1.0),
+            BackTrack::D(1.0),
+            BackTrack::D(1.0),
+            BackTrack::T(1.0),
+            BackTrack::D(1.0),
+            BackTrack::T(1.0),
+            BackTrack::D(10.0),
+            BackTrack::T(0.0),
+            BackTrack::T(1.0),
+            BackTrack::D(1.0),
+            BackTrack::T(1.0),
+            BackTrack::T(1.0),
+            BackTrack::D(1.0),
+            BackTrack::L(1.0),
+            BackTrack::DL(1.0),
+            BackTrack::T(1.0),
+            BackTrack::D(1.0),
+            BackTrack::T(1.0),
+            BackTrack::T(10.0),
+            BackTrack::T(1.0),
+            BackTrack::D(1.0),
+            BackTrack::L(1.0),
+            BackTrack::TL(1.0),
+        ];
+        let matrix = Matrix::from_vec(container, 7, 4);
+
+        let expected_paths = HashSet::from([
+            vec![[5, 3], [4, 3], [3, 2], [2, 1], [1, 0]],
+            vec![[5, 3], [4, 3], [4, 2], [4, 1], [3, 0]],
+            vec![[2, 3], [1, 2], [0, 1]],
+        ]);
+
+        let mut actual_paths: HashSet<Vec<[usize; 2]>> =
+            BackTrack::backtracking(&matrix, 5, 3, 0.0)
+                .into_iter()
+                .collect();
+
+        actual_paths.extend(BackTrack::backtracking(&matrix, 2, 3, 0.0));
+
+        // Didn't missed any path
+        let diff_missing: HashSet<_> = expected_paths.difference(&actual_paths).collect();
+        // Didn't get an invalid path
+        let diff_extra: HashSet<_> = actual_paths.difference(&expected_paths).collect();
+
+        assert!(
+            diff_missing.is_empty() && diff_extra.is_empty(),
+            "- Extra paths: {:?}.\n- Missing paths: {:?}.",
+            diff_extra,
+            diff_missing
+        );
+    }
+
+    #[test]
     fn alignment_sequence_no_gap() {
         let sequence_left = Protein::new("MVLSPADKT").unwrap();
         let sequence_top = Protein::new("MVLSGEDKS").unwrap();
