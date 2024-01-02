@@ -54,7 +54,8 @@ where
         self.solve_subproblems();
         let [row_dim, col_dim] = self.matrix.dim();
         let [init_row, init_col] = [row_dim - 1, col_dim - 1];
-        let all_paths = BackTrack::backtracking(&self.matrix, init_row, init_col);
+        let all_paths =
+            BackTrack::backtracking(&self.matrix, init_row, init_col, f32::NEG_INFINITY);
         let mut alignments: Vec<AlignmentSequence<A>> =
             Vec::with_capacity(all_paths.len());
         for backtrack_path in all_paths {

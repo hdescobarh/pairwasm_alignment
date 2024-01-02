@@ -7,7 +7,7 @@ use crate::{
 use std::mem::replace;
 
 /// Represent values for backtracking
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 #[cfg_attr(test, derive(PartialEq, Debug))]
 pub enum BackTrack {
     /// Used for initialize collections
@@ -58,15 +58,26 @@ impl BackTrack {
     }
 
     /// from an entry matrix cell tracks all the paths
+    ///
+    /// * `cutoff_score`: a lower bound for the score of a single matrix element.
+    /// If the cell contains a score equal or lower than cutoff, then the backtrack
+    /// in that branch stops. You can use f32::NEG_INFINITY if do not want to set any cutoff
     pub fn backtracking(
         matrix: &Matrix<BackTrack>,
         init_row: usize,
         init_col: usize,
+        cutoff_score: f32,
     ) -> Vec<Vec<[usize; 2]>> {
         let mut paths: Vec<Vec<[usize; 2]>> = Vec::new();
         let mut pending_stack: Vec<Vec<[usize; 2]>> = Vec::new();
         let current_path: Vec<[usize; 2]> = vec![[init_row, init_col]];
-        Self::find_paths(matrix, current_path, &mut pending_stack, &mut paths);
+        Self::find_paths(
+            matrix,
+            current_path,
+            &mut pending_stack,
+            &mut paths,
+            cutoff_score,
+        );
         paths
     }
 
@@ -75,9 +86,13 @@ impl BackTrack {
         mut current_path: Vec<[usize; 2]>,
         pending_stack: &mut Vec<Vec<[usize; 2]>>,
         paths: &mut Vec<Vec<[usize; 2]>>,
+        // The minimum allowed score of a single node. The path ends prematurely if
+        // a score lower or equal is found.
+        cutoff_score: f32,
     ) {
         let [row, col] = *current_path.last().unwrap();
-        if (row == 0) && (col == 0) {
+        let (indicator, score) = Self::decompose(matrix[[row, col]]);
+        if ((row == 0) && (col == 0)) || (score <= cutoff_score) {
             match pending_stack.pop() {
                 Some(next_path) => {
                     let old_path = replace(&mut current_path, next_path);
@@ -89,29 +104,36 @@ impl BackTrack {
                 }
             }
         } else {
-            match matrix[[row, col]] {
-                BackTrack::T(_) => current_path.push([row - 1, col]),
-                BackTrack::D(_) => current_path.push([row - 1, col - 1]),
-                BackTrack::L(_) => current_path.push([row, col - 1]),
-                BackTrack::DT(_) => {
+            match indicator {
+                // T
+                b'\x01' => current_path.push([row - 1, col]),
+                //D
+                b'\x02' => current_path.push([row - 1, col - 1]),
+                //L
+                b'\x04' => current_path.push([row, col - 1]),
+                //DT
+                b'\x03' => {
                     let mut branch = current_path.clone();
                     branch.push([row - 1, col]);
                     pending_stack.push(branch);
                     current_path.push([row - 1, col - 1]);
-                }
-                BackTrack::DL(_) => {
+                    },
+                //DL
+                b'\x06' => {
                     let mut branch = current_path.clone();
                     branch.push([row, col - 1]);
                     pending_stack.push(branch);
                     current_path.push([row - 1, col - 1]);
                 }
-                BackTrack::TL(_) => {
+                //TL
+                b'\x05' => {
                     let mut branch = current_path.clone();
                     branch.push([row, col - 1]);
                     pending_stack.push(branch);
                     current_path.push([row - 1, col]);
                 }
-                BackTrack::All(_) => {
+                //All
+                b'\x07' => {
                     let mut branch = current_path.clone();
                     branch.push([row, col - 1]);
                     pending_stack.push(branch);
@@ -120,14 +142,28 @@ impl BackTrack {
                     branch.push([row - 1, col]);
                     pending_stack.push(branch);
 
-                    current_path.push([row - 1, col - 1])
-                }
-                BackTrack::Empty => panic!(
+                    current_path.push([row - 1, col - 1])}
+
+                _ => panic!(
                     "Empty at [{row}, {col}]. Any implementation must remove all Empty from the matrix."
                 ),
             };
         };
-        Self::find_paths(matrix, current_path, pending_stack, paths);
+        Self::find_paths(matrix, current_path, pending_stack, paths, cutoff_score);
+    }
+
+    /// Separates the BackTrack from its associated value. If BackTrack::Empty, returns NAN.
+    fn decompose(backtrack: BackTrack) -> (u8, f32) {
+        match backtrack {
+            BackTrack::Empty => (0b000, f32::NAN),
+            BackTrack::T(v) => (0b001, v),
+            BackTrack::D(v) => (0b010, v),
+            BackTrack::L(v) => (0b100, v),
+            BackTrack::DT(v) => (0b011, v),
+            BackTrack::DL(v) => (0b110, v),
+            BackTrack::TL(v) => (0b101, v),
+            BackTrack::All(v) => (0b111, v),
+        }
     }
 }
 
@@ -343,7 +379,8 @@ mod test {
 
         for (start, expected_path) in test_cases {
             let [init_row, init_col] = start;
-            let actual_path = BackTrack::backtracking(&matrix, init_row, init_col);
+            let actual_path =
+                BackTrack::backtracking(&matrix, init_row, init_col, f32::NEG_INFINITY);
             assert_eq!(
                 expected_path, actual_path,
                 "Failed with starting cell [{init_row}, {init_col}]."
@@ -375,7 +412,7 @@ mod test {
             BackTrack::D(0.0),
         ];
         let matrix = Matrix::from_vec(container, 4, 4);
-        BackTrack::backtracking(&matrix, 3, 3);
+        BackTrack::backtracking(&matrix, 3, 3, f32::NEG_INFINITY);
     }
 
     #[test]
@@ -581,7 +618,7 @@ mod test {
             let matrix = Matrix::from_vec(container, rows, cols);
             let [init_row, init_col] = [rows - 1, cols - 1];
             let actual_paths: HashSet<Vec<[usize; 2]>> =
-                BackTrack::backtracking(&matrix, init_row, init_col)
+                BackTrack::backtracking(&matrix, init_row, init_col, f32::NEG_INFINITY)
                     .into_iter()
                     .collect();
 
@@ -663,7 +700,7 @@ mod test {
         let matrix = Matrix::from_vec(container, 7, 4);
         let [init_row, init_col] = [6, 3];
         let actual_path: HashSet<Vec<[usize; 2]>> =
-            BackTrack::backtracking(&matrix, init_row, init_col)
+            BackTrack::backtracking(&matrix, init_row, init_col, f32::NEG_INFINITY)
                 .into_iter()
                 .collect();
 
