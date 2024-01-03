@@ -169,6 +169,7 @@ impl BackTrack {
 }
 
 /// Represents a single alignment
+#[cfg_attr(test, derive(Debug))]
 pub struct AlignmentSequence<A>
 where
     A: AlignmentUnit,

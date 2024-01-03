@@ -134,3 +134,145 @@ impl<'a> SmithWaterman<'a, Aac> {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::bioseq::Protein;
+
+    use super::*;
+
+    #[test]
+    fn sw_blosum62_affine() {
+        let left_string: &str =
+            "MSGLRVYSTSVTGSREIKSQQSEVTRILDGKRIQYQLVDISQDNALRDEMRALAGNPKAT\
+            PPQIVNGDQYCGDYELFVEAVEQNTLQEFLKLA";
+
+        let top_string: &str =
+            "MVIRVYIASSSGSTAIKKKQQDVLCFLEANKIGFEEKDIAANEENRKWMRENVPEDSRPS\
+            TGYPLPPQIFNECQYRGDYDAFFEARENNAVYAFLGLTAPPGSKEAEAQANQQA";
+
+        let sequence_left = Protein::new(left_string).unwrap();
+        let sequence_top = Protein::new(top_string).unwrap();
+        let mut sw = SmithWaterman::new(
+            &sequence_left,
+            &sequence_top,
+            AaScoringKind::Blosum62,
+            PenaltyKind::Affine(10.0, 1.0),
+        );
+
+        let alignments = sw.run();
+
+        let expected_alignment = [
+            [Some(Aac::L), Some(Aac::I)],
+            [Some(Aac::R), Some(Aac::R)],
+            [Some(Aac::V), Some(Aac::V)],
+            [Some(Aac::Y), Some(Aac::Y)],
+            [Some(Aac::S), Some(Aac::I)],
+            [Some(Aac::T), Some(Aac::A)],
+            [Some(Aac::S), Some(Aac::S)],
+            [Some(Aac::V), Some(Aac::S)],
+            [Some(Aac::T), Some(Aac::S)],
+            [Some(Aac::G), Some(Aac::G)],
+            [Some(Aac::S), Some(Aac::S)],
+            [Some(Aac::R), Some(Aac::T)],
+            [Some(Aac::E), Some(Aac::A)],
+            [Some(Aac::I), Some(Aac::I)],
+            [Some(Aac::K), Some(Aac::K)],
+            [Some(Aac::S), Some(Aac::K)],
+            [Some(Aac::Q), Some(Aac::K)],
+            [Some(Aac::Q), Some(Aac::Q)],
+            [Some(Aac::S), Some(Aac::Q)],
+            [Some(Aac::E), Some(Aac::D)],
+            [Some(Aac::V), Some(Aac::V)],
+            [Some(Aac::T), Some(Aac::L)],
+            [Some(Aac::R), Some(Aac::C)],
+            [Some(Aac::I), Some(Aac::F)],
+            [Some(Aac::L), Some(Aac::L)],
+            [Some(Aac::D), Some(Aac::E)],
+            [Some(Aac::G), Some(Aac::A)],
+            [Some(Aac::K), Some(Aac::N)],
+            [Some(Aac::R), Some(Aac::K)],
+            [Some(Aac::I), Some(Aac::I)],
+            [Some(Aac::Q), Some(Aac::G)],
+            [Some(Aac::Y), Some(Aac::F)],
+            [Some(Aac::Q), Some(Aac::E)],
+            [Some(Aac::L), Some(Aac::E)],
+            [Some(Aac::V), Some(Aac::K)],
+            [Some(Aac::D), Some(Aac::D)],
+            [Some(Aac::I), Some(Aac::I)],
+            [Some(Aac::S), Some(Aac::A)],
+            [Some(Aac::Q), Some(Aac::A)],
+            [Some(Aac::D), Some(Aac::N)],
+            [Some(Aac::N), Some(Aac::E)],
+            [Some(Aac::A), Some(Aac::E)],
+            [Some(Aac::L), Some(Aac::N)],
+            [Some(Aac::R), Some(Aac::R)],
+            [None, Some(Aac::K)],
+            [None, Some(Aac::W)],
+            [None, Some(Aac::M)],
+            [None, Some(Aac::R)],
+            [None, Some(Aac::E)],
+            [None, Some(Aac::N)],
+            [None, Some(Aac::V)],
+            [None, Some(Aac::P)],
+            [Some(Aac::D), Some(Aac::E)],
+            [Some(Aac::E), Some(Aac::D)],
+            [Some(Aac::M), Some(Aac::S)],
+            [Some(Aac::R), Some(Aac::R)],
+            [Some(Aac::A), Some(Aac::P)],
+            [Some(Aac::L), Some(Aac::S)],
+            [Some(Aac::A), Some(Aac::T)],
+            [Some(Aac::G), Some(Aac::G)],
+            [Some(Aac::N), Some(Aac::Y)],
+            [Some(Aac::P), Some(Aac::P)],
+            [Some(Aac::K), None],
+            [Some(Aac::A), None],
+            [Some(Aac::T), Some(Aac::L)],
+            [Some(Aac::P), Some(Aac::P)],
+            [Some(Aac::P), Some(Aac::P)],
+            [Some(Aac::Q), Some(Aac::Q)],
+            [Some(Aac::I), Some(Aac::I)],
+            [Some(Aac::V), Some(Aac::F)],
+            [Some(Aac::N), Some(Aac::N)],
+            [Some(Aac::G), Some(Aac::E)],
+            [Some(Aac::D), Some(Aac::C)],
+            [Some(Aac::Q), Some(Aac::Q)],
+            [Some(Aac::Y), Some(Aac::Y)],
+            [Some(Aac::C), Some(Aac::R)],
+            [Some(Aac::G), Some(Aac::G)],
+            [Some(Aac::D), Some(Aac::D)],
+            [Some(Aac::Y), Some(Aac::Y)],
+            [Some(Aac::E), Some(Aac::D)],
+            [Some(Aac::L), Some(Aac::A)],
+            [Some(Aac::F), Some(Aac::F)],
+            [Some(Aac::V), Some(Aac::F)],
+            [Some(Aac::E), Some(Aac::E)],
+            [Some(Aac::A), Some(Aac::A)],
+            [Some(Aac::V), Some(Aac::R)],
+            [Some(Aac::E), Some(Aac::E)],
+            [Some(Aac::Q), Some(Aac::N)],
+            [Some(Aac::N), Some(Aac::N)],
+            [Some(Aac::T), Some(Aac::A)],
+            [Some(Aac::L), Some(Aac::V)],
+            [Some(Aac::Q), Some(Aac::Y)],
+            [Some(Aac::E), Some(Aac::A)],
+            [Some(Aac::F), Some(Aac::F)],
+            [Some(Aac::L), Some(Aac::L)],
+            [Some(Aac::K), Some(Aac::G)],
+            [Some(Aac::L), Some(Aac::L)],
+        ];
+
+        let actual_alignment = alignments[0].read();
+
+        for p in 0..expected_alignment.len() {
+            assert!(
+                expected_alignment[p][0] == actual_alignment[p][0]
+                    && expected_alignment[p][1] == actual_alignment[p][1],
+                "Error at position {}. Expected [{:?}. Got [{:?}]]",
+                p,
+                expected_alignment[p],
+                actual_alignment[p]
+            )
+        }
+    }
+}
