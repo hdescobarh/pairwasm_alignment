@@ -1,6 +1,6 @@
 //! Algorithms for local alignment
 
-use super::utils::{AlignmentSequence, BackTrack, TransversalOrder};
+use super::utils::{AffineTransversalOrder, AlignmentSequence, BackTrack};
 use crate::bioseq::{Aac, HasSequence};
 use crate::matrix::Matrix;
 use crate::scoring_schema::aminoacid_schema::AaScoringKind;
@@ -37,7 +37,7 @@ where
     }
 }
 
-impl<'a, A> TransversalOrder<A> for SmithWaterman<'a, A> where A: AlignmentUnit {}
+impl<'a, A> AffineTransversalOrder<A> for SmithWaterman<'a, A> where A: AlignmentUnit {}
 
 impl<'a> SmithWaterman<'a, Aac> {
     // S -> row sequence, T -> col sequence

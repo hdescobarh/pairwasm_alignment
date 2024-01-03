@@ -1,5 +1,5 @@
 // The original Needleman-Wunsch uses a linear gap penalty
-use super::utils::{AlignmentSequence, BackTrack, TransversalOrder};
+use super::utils::{AffineTransversalOrder, AlignmentSequence, BackTrack};
 use crate::bioseq::{Aac, HasSequence};
 use crate::matrix::Matrix;
 use crate::scoring_schema::aminoacid_schema::AaScoringKind;
@@ -101,7 +101,7 @@ where
     }
 }
 
-impl<'a, A> TransversalOrder<A> for NeedlemanWunsch<'a, A> where A: AlignmentUnit {}
+impl<'a, A> AffineTransversalOrder<A> for NeedlemanWunsch<'a, A> where A: AlignmentUnit {}
 
 #[cfg(test)]
 mod test {

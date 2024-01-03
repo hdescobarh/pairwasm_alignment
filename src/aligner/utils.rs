@@ -220,7 +220,9 @@ where
     }
 }
 
-pub trait TransversalOrder<A>
+// Be aware this implimentation is intended to be used with Affine gap models and
+// their subsets; i.e., Linear and constant models.
+pub trait AffineTransversalOrder<A>
 where
     A: AlignmentUnit,
 {
