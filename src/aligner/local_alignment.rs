@@ -8,7 +8,7 @@ use crate::scoring_schema::gap_penalty::PenaltyKind;
 use crate::scoring_schema::AaScoringSchema;
 use crate::{scoring_schema::ScoringSchema, utils::AlignmentUnit};
 
-/// Smith Waterman original algorithm.
+/// Smith Waterman original algorithm. Returns the longest and best local alignment.
 pub struct SmithWaterman<'a, A>
 where
     A: AlignmentUnit,
@@ -34,20 +34,21 @@ where
         let mut all_paths: Vec<Vec<[usize; 2]>> = Vec::new();
 
         for [init_row, init_col] in &self.maximum_indices {
-            let mut x = BackTrack::backtracking(&self.matrix, *init_row, *init_col, 0.0);
-            all_paths.append(&mut x);
+            let mut path =
+                BackTrack::backtracking(&self.matrix, *init_row, *init_col, 0.0);
+            all_paths.append(&mut path);
         }
 
-        let mut alignments: Vec<AlignmentSequence<A>> =
-            Vec::with_capacity(all_paths.len());
-        for backtrack_path in all_paths {
-            let new_alignment = AlignmentSequence::new(
-                backtrack_path,
-                self.sequence_left,
-                self.sequence_top,
-            );
-            alignments.push(new_alignment);
-        }
+        let longest_path = all_paths
+            .into_iter()
+            .reduce(|acc, e| if acc.len() > e.len() { acc } else { e })
+            .unwrap();
+
+        let alignments: Vec<AlignmentSequence<A>> = vec![AlignmentSequence::new(
+            longest_path,
+            self.sequence_left,
+            self.sequence_top,
+        )];
         alignments
     }
 
@@ -75,9 +76,12 @@ where
                     &self.matrix,
                     i,
                     j,
-                );
-                let top = Self::top_score(&self.scoring_schema, &self.matrix, i, j);
-                let left = Self::left_score(&self.scoring_schema, &self.matrix, i, j);
+                )
+                .max(0.0);
+                let top =
+                    Self::top_score(&self.scoring_schema, &self.matrix, i, j).max(0.0);
+                let left =
+                    Self::left_score(&self.scoring_schema, &self.matrix, i, j).max(0.0);
 
                 let (backtrack, current_maximum) =
                     BackTrack::make_backtrack(top, diagonal, left);
