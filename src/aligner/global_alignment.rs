@@ -95,7 +95,7 @@ where
                 );
                 let top = Self::top_score(&self.scoring_schema, &self.matrix, i, j);
                 let left = Self::left_score(&self.scoring_schema, &self.matrix, i, j);
-                self.matrix[[i, j]] = BackTrack::make_backtrack(top, diagonal, left);
+                self.matrix[[i, j]] = BackTrack::make_backtrack(top, diagonal, left).0;
             }
         }
     }

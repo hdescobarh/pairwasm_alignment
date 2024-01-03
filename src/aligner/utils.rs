@@ -30,7 +30,7 @@ pub enum BackTrack {
 
 impl BackTrack {
     /// generate the back track direction from the scores
-    pub fn make_backtrack(top: f32, diagonal: f32, left: f32) -> BackTrack {
+    pub fn make_backtrack(top: f32, diagonal: f32, left: f32) -> (BackTrack, f32) {
         let max_score = [top, diagonal, left].into_iter().reduce(f32::max).unwrap();
         let mut which_back: u8 = 0b000;
         for (value, indicator) in [(top, 0b001), (diagonal, 0b010), (left, 0b100)] {
@@ -41,7 +41,7 @@ impl BackTrack {
 
         // [Empty, Top, Diag., Left, Diag-top, Diag-left, Top-left, Any]
         // [0b000, 0b001, 0b010, 0b100, 0b011, 0b110, 0b101, 0b111]
-        match which_back {
+        let backtrack = match which_back {
             b'\x01' => BackTrack::T(max_score),
             b'\x02' => BackTrack::D(max_score),
             b'\x04' => BackTrack::L(max_score),
@@ -54,7 +54,8 @@ impl BackTrack {
              Max score: {}. Back Value {}",
                 max_score, which_back
             ),
-        }
+        };
+        (backtrack, max_score)
     }
 
     /// from an entry matrix cell tracks all the paths
@@ -339,7 +340,7 @@ mod test {
         for (expected, [top, diagonal, left]) in test_cases {
             assert_eq!(
                 expected,
-                BackTrack::make_backtrack(top, diagonal, left),
+                BackTrack::make_backtrack(top, diagonal, left).0,
                 "Failed at case [{},{},{}]",
                 top,
                 diagonal,
