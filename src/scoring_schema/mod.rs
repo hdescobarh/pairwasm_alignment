@@ -27,7 +27,7 @@ where
 
 /// Scoring schema's gap penalty component
 pub trait GapPenalty {
-    /// The gap penalty is a map $(length) \mapto \mathbb(R)$.
+    /// The gap penalty is a map (length) ↦ ℝ.
     fn function(&self, length: usize) -> CostType;
 
     /// Get the open gap parameter. Be aware that under some gap penalty models
@@ -53,7 +53,6 @@ where
 }
 
 /// Amino acid sequence scoring schema
-
 pub struct AaScoringSchema {
     substitution: Box<dyn Similarity<Aac>>,
     penalty: Box<dyn GapPenalty>,

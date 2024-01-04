@@ -5,12 +5,14 @@ use super::Similarity;
 use super::SimilarityType;
 use crate::bioseq::Aac;
 
+/// Represents available Amino acid scoring matrices
 pub enum AaScoringKind {
     Blosum45,
     Blosum62,
     Pam160,
 }
 
+/// Similarity schema constructor
 pub fn similarity_builder(kind: AaScoringKind) -> Box<dyn Similarity<Aac>> {
     match kind {
         AaScoringKind::Blosum45 => Box::new(Blosum45 {}),
