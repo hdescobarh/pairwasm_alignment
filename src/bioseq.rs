@@ -41,11 +41,15 @@ impl Aac {
     ///
     /// ```
     /// use pairwise_alignment::bioseq::*;
+    /// use std::mem;
     ///
-    /// // let lys = Aac::from_char('l').unwrap();
-    /// // assert_eq!(Aac::L, lys);
-    /// // assert_eq!(lys, Aac::from_char('L').unwrap());
-    /// // assert!(Aac::from_char('Z').is_err())
+    /// let lys = Aac::from_char('l').unwrap();
+    /// assert_eq!(mem::discriminant(&Aac::L), mem::discriminant(&lys));
+    /// assert_eq!(
+    ///     mem::discriminant(&lys),
+    ///     mem::discriminant(&Aac::from_char('L').unwrap())
+    /// );
+    /// assert!(Aac::from_char('Z').is_err())
     /// ```
     pub fn from_char(char_code: char) -> Result<Self, SeqError> {
         if !char_code.is_ascii() {
@@ -112,10 +116,17 @@ impl Protein {
     /// # Examples
     ///
     /// ```
-    /// // use pairwise_alignment::bioseq::*;
-    /// // let protein = Protein::new("pVaGH").unwrap();
-    /// // assert_eq!([Aac::P, Aac::V, Aac::A, Aac::G, Aac::H].to_vec(),*protein.seq());
-    /// // assert!(Protein::new("pBaGH").is_err())
+    /// use pairwise_alignment::bioseq::*;
+    /// use std::mem;
+    /// let protein = Protein::new("pVaGH").unwrap();
+    /// let expected_sequence: Vec<Aac> = [Aac::P, Aac::V, Aac::A, Aac::G, Aac::H].to_vec();
+    /// for (i, aminoacid) in protein.seq().iter().enumerate() {
+    ///     assert_eq!(
+    ///         mem::discriminant(aminoacid),
+    ///         mem::discriminant(&expected_sequence[i])
+    ///     );
+    /// }
+    /// assert!(Protein::new("pBaGH").is_err())
     /// ```
     pub fn new(string: &str) -> Result<Self, SeqError> {
         if string.is_empty() {
