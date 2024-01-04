@@ -61,7 +61,7 @@ impl BackTrack {
 
     /// generate the back track direction from the scores
     /// metric_like the output score is such that d(x, y) >= 0, and d(x, y) = 0 for some x != y
-    pub fn make_backtrack_metric_like(
+    pub fn make_backtrack_similarity(
         top: f32,
         diagonal: f32,
         left: f32,
