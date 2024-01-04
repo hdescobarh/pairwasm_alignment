@@ -67,31 +67,14 @@ impl BackTrack {
         left: f32,
     ) -> (BackTrack, f32) {
         let mut max_score = [top, diagonal, left].into_iter().reduce(f32::max).unwrap();
-        let mut which_back: u8 = 0b000;
+        let mut discriminant: u8 = 0b000;
         for (value, indicator) in [(top, 0b001), (diagonal, 0b010), (left, 0b100)] {
             if value == max_score {
-                which_back |= indicator
+                discriminant |= indicator
             }
         }
-
         max_score = max_score.max(0.0);
-
-        // [Empty, Top, Diag., Left, Diag-top, Diag-left, Top-left, Any]
-        // [0b000, 0b001, 0b010, 0b100, 0b011, 0b110, 0b101, 0b111]
-        let backtrack = match which_back {
-            b'\x01' => BackTrack::T(max_score),
-            b'\x02' => BackTrack::D(max_score),
-            b'\x04' => BackTrack::L(max_score),
-            b'\x03' => BackTrack::DT(max_score),
-            b'\x06' => BackTrack::DL(max_score),
-            b'\x05' => BackTrack::TL(max_score),
-            b'\x07' => BackTrack::All(max_score),
-            _ => panic!(
-                "This must be unreachable. Check match variants.\
-             Max score: {}. Back Value {}",
-                max_score, which_back
-            ),
-        };
+        let backtrack = Self::nonempty_from_discriminant(discriminant, max_score);
         (backtrack, max_score)
     }
 
