@@ -1,6 +1,7 @@
 //! Algorithms for local alignment
 
 use super::utils::{AffineTransversalOrder, AlignmentSequence, BackTrack};
+use super::Aligner;
 use crate::bioseq::{Aac, HasSequence};
 use crate::matrix::Matrix;
 use crate::scoring_schema::aminoacid_schema::AaScoringKind;
@@ -27,7 +28,7 @@ impl<'a, A> SmithWaterman<'a, A>
 where
     A: AlignmentUnit,
 {
-    pub fn run(&mut self) -> Vec<AlignmentSequence<A>> {
+    fn run(&mut self) -> Vec<AlignmentSequence<A>> {
         self.initialize();
         self.solve_subproblems();
 
@@ -129,6 +130,15 @@ impl<'a> SmithWaterman<'a, Aac> {
             global_maximum: f32::NEG_INFINITY,
             maximum_indices: Vec::new(),
         }
+    }
+}
+
+impl<'a, A> Aligner<A> for SmithWaterman<'a, A>
+where
+    A: AlignmentUnit,
+{
+    fn run(&mut self) -> Vec<AlignmentSequence<A>> {
+        self.run()
     }
 }
 

@@ -1,3 +1,4 @@
+use super::Aligner;
 // The original Needleman-Wunsch uses a linear gap penalty
 use super::utils::{AffineTransversalOrder, AlignmentSequence, BackTrack};
 use crate::bioseq::{Aac, HasSequence};
@@ -49,7 +50,7 @@ impl<'a, A> NeedlemanWunsch<'a, A>
 where
     A: AlignmentUnit,
 {
-    pub fn run(&mut self) -> Vec<AlignmentSequence<A>> {
+    fn run(&mut self) -> Vec<AlignmentSequence<A>> {
         self.initialize();
         self.solve_subproblems();
         let [row_dim, col_dim] = self.matrix.dim();
@@ -102,6 +103,15 @@ where
 }
 
 impl<'a, A> AffineTransversalOrder<A> for NeedlemanWunsch<'a, A> where A: AlignmentUnit {}
+
+impl<'a, A> Aligner<A> for NeedlemanWunsch<'a, A>
+where
+    A: AlignmentUnit,
+{
+    fn run(&mut self) -> Vec<AlignmentSequence<A>> {
+        self.run()
+    }
+}
 
 #[cfg(test)]
 mod test {
