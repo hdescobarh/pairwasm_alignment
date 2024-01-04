@@ -9,35 +9,72 @@ use std::mem::replace;
 /// Represent values for backtracking
 #[derive(Clone, Copy)]
 #[cfg_attr(test, derive(PartialEq, Debug))]
+#[repr(u8)]
 pub enum BackTrack {
-    /// Used for initialize collections
-    Empty,
-    /// Top: Gap at top sequence
-    T(f32),
-    /// Top-left: Match/Mismatch
-    D(f32),
-    /// Left: Gap at left sequence
-    L(f32),
-    /// Top-left and top
-    DT(f32),
-    /// Top-left and left
-    DL(f32),
-    /// Top and left
-    TL(f32),
-    /// All: top, left and top-left
-    All(f32),
+    /// Empty (0): used for initialize collections.
+    Empty = 0,
+    /// Top (1): Gap at top sequence.
+    T(f32) = 0b001,
+    /// Top-left (2): Match/Mismatch.
+    D(f32) = 0b010,
+    /// Left (4): Gap at left sequence.
+    L(f32) = 0b100,
+    /// Top-left and top (3).
+    DT(f32) = 0b011,
+    /// Top-left and left (6).
+    DL(f32) = 0b110,
+    /// Top and left (5).
+    TL(f32) = 0b101,
+    /// All (7): top, left and top-left.
+    All(f32) = 0b111,
 }
 
 impl BackTrack {
+    /// Create a BackTrack from its discriminant value
+    fn nonempty_from_discriminant(discriminant: u8, score: f32) -> Self {
+        // [Empty, Top, Diag., Left, Diag-top, Diag-left, Top-left, Any]
+        // [0b000, 0b001, 0b010, 0b100, 0b011, 0b110, 0b101, 0b111]
+        match discriminant {
+            b'\x01' => BackTrack::T(score),
+            b'\x02' => BackTrack::D(score),
+            b'\x04' => BackTrack::L(score),
+            b'\x03' => BackTrack::DT(score),
+            b'\x06' => BackTrack::DL(score),
+            b'\x05' => BackTrack::TL(score),
+            b'\x07' => BackTrack::All(score),
+            _ => panic!("The value {} is not a valid discriminant.", discriminant),
+        }
+    }
+
     /// generate the back track direction from the scores
     pub fn make_backtrack(top: f32, diagonal: f32, left: f32) -> (BackTrack, f32) {
         let max_score = [top, diagonal, left].into_iter().reduce(f32::max).unwrap();
+        let mut discriminant: u8 = 0b000;
+        for (value, indicator) in [(top, 0b001), (diagonal, 0b010), (left, 0b100)] {
+            if value == max_score {
+                discriminant |= indicator
+            }
+        }
+        let backtrack = Self::nonempty_from_discriminant(discriminant, max_score);
+        (backtrack, max_score)
+    }
+
+    /// generate the back track direction from the scores
+    /// metric_like the output score is such that d(x, y) >= 0, and d(x, y) = 0 for some x != y
+    pub fn make_backtrack_metric_like(
+        top: f32,
+        diagonal: f32,
+        left: f32,
+    ) -> (BackTrack, f32) {
+        let mut max_score = [top, diagonal, left].into_iter().reduce(f32::max).unwrap();
         let mut which_back: u8 = 0b000;
         for (value, indicator) in [(top, 0b001), (diagonal, 0b010), (left, 0b100)] {
             if value == max_score {
                 which_back |= indicator
             }
         }
+
+        max_score = max_score.max(0.0);
 
         // [Empty, Top, Diag., Left, Diag-top, Diag-left, Top-left, Any]
         // [0b000, 0b001, 0b010, 0b100, 0b011, 0b110, 0b101, 0b111]
