@@ -76,15 +76,12 @@ where
                     &self.matrix,
                     i,
                     j,
-                )
-                .max(0.0);
-                let top =
-                    Self::top_score(&self.scoring_schema, &self.matrix, i, j).max(0.0);
-                let left =
-                    Self::left_score(&self.scoring_schema, &self.matrix, i, j).max(0.0);
+                );
+                let top = Self::top_score(&self.scoring_schema, &self.matrix, i, j);
+                let left = Self::left_score(&self.scoring_schema, &self.matrix, i, j);
 
                 let (backtrack, current_maximum) =
-                    BackTrack::make_backtrack(top, diagonal, left);
+                    BackTrack::make_backtrack_metric_like(top, diagonal, left);
                 self.update_maximum_entries(current_maximum, i, j);
                 self.matrix[[i, j]] = backtrack;
             }
