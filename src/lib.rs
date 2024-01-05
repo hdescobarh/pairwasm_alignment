@@ -1,5 +1,6 @@
 pub mod aligner;
 pub mod bioseq;
+pub mod formatter;
 pub mod matrix;
 pub mod scoring_schema;
 pub mod utils;

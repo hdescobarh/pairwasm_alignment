@@ -4,8 +4,8 @@ use crate::utils::AlignmentUnit;
 use std::fmt::Debug;
 
 /// IUPAC Amino acid codes. Represents the basic 20 amino acids.
-#[derive(Clone, Copy)]
-#[cfg_attr(test, derive(Debug, PartialEq, Eq, PartialOrd, Ord))]
+#[derive(Clone, Copy, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug, PartialOrd, Ord))]
 #[repr(u8)]
 pub enum Aac {
     A,
