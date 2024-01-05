@@ -58,7 +58,11 @@
         "clippy",
         "IUPAC",
         "Needleman",
+        "Wunsch",
+        "Smith",
+        "Waterman",
         "PAM",
+        "repr",
         "rustfmt",
         "tamasfe",
         "vadimcn"
