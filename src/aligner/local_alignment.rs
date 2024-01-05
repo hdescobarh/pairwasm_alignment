@@ -10,12 +10,12 @@ use crate::scoring_schema::AaScoringSchema;
 use crate::{scoring_schema::ScoringSchema, utils::AlignmentUnit};
 
 /// Smith Waterman original algorithm. Returns the longest and best local alignment.
-pub struct SmithWaterman<'a, A>
+pub struct SmithWaterman<A>
 where
     A: AlignmentUnit,
 {
-    sequence_left: &'a dyn HasSequence<A>,
-    sequence_top: &'a dyn HasSequence<A>,
+    sequence_left: Box<dyn HasSequence<A>>,
+    sequence_top: Box<dyn HasSequence<A>>,
     scoring_schema: Box<dyn ScoringSchema<A>>,
     matrix: Matrix<BackTrack>,
     /// The highest found score
@@ -24,7 +24,7 @@ where
     maximum_indices: Vec<[usize; 2]>,
 }
 
-impl<'a, A> SmithWaterman<'a, A>
+impl<A> SmithWaterman<A>
 where
     A: AlignmentUnit,
 {
@@ -47,8 +47,8 @@ where
 
         let alignments: Vec<AlignmentSequence<A>> = vec![AlignmentSequence::new(
             longest_path,
-            self.sequence_left,
-            self.sequence_top,
+            self.sequence_left.as_ref(),
+            self.sequence_top.as_ref(),
         )];
         alignments
     }
@@ -71,8 +71,8 @@ where
         for i in 1..rows {
             for j in 1..cols {
                 let diagonal = Self::diagonal_score(
-                    self.sequence_left,
-                    self.sequence_top,
+                    self.sequence_left.as_ref(),
+                    self.sequence_top.as_ref(),
                     &self.scoring_schema,
                     &self.matrix,
                     i,
@@ -101,13 +101,13 @@ where
     }
 }
 
-impl<'a, A> AffineTransversalOrder<A> for SmithWaterman<'a, A> where A: AlignmentUnit {}
+impl<A> AffineTransversalOrder<A> for SmithWaterman<A> where A: AlignmentUnit {}
 
-impl<'a> SmithWaterman<'a, Aac> {
+impl SmithWaterman<Aac> {
     // S -> row sequence, T -> col sequence
     pub fn new(
-        sequence_left: &'a dyn HasSequence<Aac>,
-        sequence_top: &'a dyn HasSequence<Aac>,
+        sequence_left: impl HasSequence<Aac> + 'static,
+        sequence_top: impl HasSequence<Aac> + 'static,
         score_kind: AaScoringKind,
         penalty_kind: PenaltyKind,
     ) -> Self {
@@ -123,8 +123,8 @@ impl<'a> SmithWaterman<'a, Aac> {
         let cols = 1 + sequence_top.seq().len();
 
         Self {
-            sequence_left,
-            sequence_top,
+            sequence_left: Box::new(sequence_left),
+            sequence_top: Box::new(sequence_top),
             scoring_schema: scoring_schema as Box<dyn ScoringSchema<Aac>>,
             matrix: Matrix::full(BackTrack::Empty, rows, cols),
             global_maximum: f32::NEG_INFINITY,
@@ -133,7 +133,7 @@ impl<'a> SmithWaterman<'a, Aac> {
     }
 }
 
-impl<'a, A> Aligner<A> for SmithWaterman<'a, A>
+impl<A> Aligner<A> for SmithWaterman<A>
 where
     A: AlignmentUnit,
 {
@@ -161,8 +161,8 @@ mod test {
         let sequence_left = Protein::new(left_string).unwrap();
         let sequence_top = Protein::new(top_string).unwrap();
         let mut sw = SmithWaterman::new(
-            &sequence_left,
-            &sequence_top,
+            sequence_left,
+            sequence_top,
             AaScoringKind::Blosum62,
             PenaltyKind::Affine(10.0, 1.0),
         );

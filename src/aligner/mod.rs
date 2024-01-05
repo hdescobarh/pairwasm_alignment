@@ -13,7 +13,7 @@ use self::{
 
 mod global_alignment;
 mod local_alignment;
-mod utils;
+pub mod utils;
 
 /// Flag for alignment algorithm implementations
 pub trait Aligner<A: AlignmentUnit> {
@@ -26,13 +26,13 @@ pub enum AlignerKind {
 }
 
 /// Aligner constructor
-pub fn aminoacid_align_builder<'a>(
+pub fn aminoacid_align_builder(
     kind: AlignerKind,
-    sequence_1: &'a dyn HasSequence<Aac>,
-    sequence_2: &'a dyn HasSequence<Aac>,
+    sequence_1: impl HasSequence<Aac> + 'static,
+    sequence_2: impl HasSequence<Aac> + 'static,
     score_kind: AaScoringKind,
     penalty_kind: PenaltyKind,
-) -> Box<dyn Aligner<Aac> + 'a> {
+) -> Box<dyn Aligner<Aac>> {
     match kind {
         AlignerKind::NeedlemanWunsch => Box::new(NeedlemanWunsch::new(
             sequence_1,
