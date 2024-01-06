@@ -41,7 +41,7 @@ impl From<&Aac> for char {
 
 impl<A> Display for AlignmentSequence<A>
 where
-    A: AlignmentUnit + Display + PartialEq,
+    A: AlignmentUnit + PartialEq,
     char: for<'a> From<&'a A>,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
