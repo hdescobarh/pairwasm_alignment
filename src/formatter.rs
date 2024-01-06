@@ -2,6 +2,9 @@
 
 use crate::aligner::utils::AlignmentSequence;
 use crate::bioseq::Aac;
+use crate::utils::AlignmentUnit;
+use std::cmp::PartialEq;
+use std::convert::From;
 use std::fmt::Display;
 
 const GAP_STR: char = '_';
@@ -36,7 +39,11 @@ impl From<&Aac> for char {
     }
 }
 
-impl Display for AlignmentSequence<Aac> {
+impl<A> Display for AlignmentSequence<A>
+where
+    A: AlignmentUnit + Display + PartialEq,
+    char: for<'a> From<&'a A>,
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut line1: String = String::with_capacity(self.read().len());
         let mut line2: String = String::with_capacity(self.read().len());
