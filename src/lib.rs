@@ -5,6 +5,9 @@ mod matrix;
 mod scoring_schema;
 mod utils;
 
+#[cfg(test)]
+pub mod test;
+
 use aligner::{utils::AlignmentSequence, Aligner, AlignerKind};
 use bioseq::{Aac, HasSequence};
 use scoring_schema::{aminoacid_schema::AaScoringKind, gap_penalty::PenaltyKind};
