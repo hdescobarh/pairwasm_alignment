@@ -1,10 +1,10 @@
 [package]
-name = "pairwise_alignment"
+name = "pairwasm_alignment"
 version = "0.1.0"
 edition = "2021"
 authors = ["Hans D. Escobar H. <escobar.hans@gmail.com>"]
-description = "Tool for global and local pairwaise sequence alignment"
-license = "MIT OR Apache-2.0"
+description = "Tool for global and local pairwaise sequence alignment."
+license = "MIT"
 keywords = [
     "sequence alignment",
     "pairwise alignment",
