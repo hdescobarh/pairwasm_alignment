@@ -58,13 +58,14 @@
         "clippy",
         "IUPAC",
         "Needleman",
-        "Wunsch",
-        "Smith",
-        "Waterman",
+        "pairwasm",
         "PAM",
         "repr",
         "rustfmt",
+        "Smith",
         "tamasfe",
-        "vadimcn"
+        "vadimcn",
+        "Waterman",
+        "Wunsch"
     ]
 }
