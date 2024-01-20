@@ -12,6 +12,7 @@ keywords = [
     "WebAssembly",
 ]
 categories = ["science", "wasm"]
+repository = "https://github.com/hdescobarh/pairwasm_alignment"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
