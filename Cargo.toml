@@ -3,7 +3,7 @@ name = "pairwasm_alignment"
 version = "0.1.0"
 edition = "2021"
 authors = ["Hans D. Escobar H. <escobar.hans@gmail.com>"]
-description = "Tool for global and local pairwaise sequence alignment."
+description = "Experiment. Performs global and local pairwise sequence alignment through WebAssembly."
 license = "MIT"
 keywords = [
     "sequence alignment",
