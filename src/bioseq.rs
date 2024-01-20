@@ -40,7 +40,7 @@ impl Aac {
     /// # Examples
     ///
     /// ```
-    /// use pairwise_alignment::bioseq::*;
+    /// use pairwasm_alignment::bioseq::*;
     /// use std::mem;
     ///
     /// let lys = Aac::from_char('l').unwrap();
@@ -116,7 +116,7 @@ impl Protein {
     /// # Examples
     ///
     /// ```
-    /// use pairwise_alignment::bioseq::*;
+    /// use pairwasm_alignment::bioseq::*;
     /// use std::mem;
     /// let protein = Protein::new("pVaGH").unwrap();
     /// let expected_sequence: Vec<Aac> = [Aac::P, Aac::V, Aac::A, Aac::G, Aac::H].to_vec();

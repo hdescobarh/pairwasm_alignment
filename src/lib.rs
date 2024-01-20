@@ -1,8 +1,8 @@
 mod aligner;
-mod bioseq;
+pub mod bioseq;
 mod formatter;
-mod matrix;
-mod scoring_schema;
+pub mod matrix;
+pub mod scoring_schema;
 mod utils;
 
 #[cfg(test)]

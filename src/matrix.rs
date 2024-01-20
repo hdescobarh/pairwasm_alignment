@@ -33,7 +33,7 @@ impl<T: std::clone::Clone> Matrix<T> {
     /// # Examples:
     ///
     /// ```
-    /// use pairwise_alignment::matrix::*;
+    /// use pairwasm_alignment::matrix::*;
     /// let mut matrix: Matrix<u8> = Matrix::empty(2,2);
     ///
     /// // this panics:
@@ -62,7 +62,7 @@ impl<T: std::clone::Clone> Matrix<T> {
     /// # Examples:
     ///
     /// ```
-    /// use pairwise_alignment::matrix::*;
+    /// use pairwasm_alignment::matrix::*;
     /// let mut matrix: Matrix<&str> = Matrix::full("🦀", 2, 3);
     /// assert_eq!("🦀", matrix[[1, 2]]);
     /// matrix[[1, 2]] = "🐢";
@@ -87,7 +87,7 @@ impl<T: std::clone::Clone> Matrix<T> {
     /// # Examples:
     ///
     /// ```
-    /// use pairwise_alignment::matrix::*;
+    /// use pairwasm_alignment::matrix::*;
     ///
     /// let mut matrix: Matrix<char> = Matrix::full('学', 2, 3);
     /// assert!(matrix.get(1, 0).is_ok_and(|v| *v == '学'));
@@ -116,7 +116,7 @@ impl<T: std::clone::Clone> Matrix<T> {
     /// # Examples:
     ///
     /// ```
-    /// use pairwise_alignment::matrix::*;
+    /// use pairwasm_alignment::matrix::*;
     ///
     /// let mut matrix: Matrix<i128> = Matrix::full(-60, 2, 3);
     /// assert_eq!(-60, matrix[[1, 0]]);
@@ -152,7 +152,7 @@ impl<T: std::clone::Clone> Matrix<T> {
     /// # Examples
     ///
     /// ```
-    /// use pairwise_alignment::matrix::*;
+    /// use pairwasm_alignment::matrix::*;
     /// let mut matrix: Matrix<i8> = Matrix::empty(2,2);
     ///
     /// // this panics:
@@ -183,7 +183,7 @@ impl<T: std::clone::Clone> Matrix<T> {
     ///     ⋯, (rows-1, cols-2), (rows-1, cols-1).
     ///
     /// ```
-    /// use pairwise_alignment::matrix::*;
+    /// use pairwasm_alignment::matrix::*;
     /// let mut matrix: Matrix<&str> = Matrix::empty(3,3);
     ///
     /// // this panics:
