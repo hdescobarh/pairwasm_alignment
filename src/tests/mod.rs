@@ -1,4 +1,4 @@
-//! Integration tests for non-web functionalities.
+pub mod web;
 
 #[test]
 fn pass() {

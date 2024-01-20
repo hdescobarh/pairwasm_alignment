@@ -1,4 +1,5 @@
 //! Test suite for the Web and headless browsers.
+
 #![cfg(target_arch = "wasm32")]
 
 // https://rustwasm.github.io/wasm-bindgen/wasm-bindgen-test/usage.html

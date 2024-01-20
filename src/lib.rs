@@ -6,7 +6,7 @@ pub mod scoring_schema;
 mod utils;
 
 #[cfg(test)]
-pub mod test;
+pub mod tests;
 
 use aligner::{utils::AlignmentSequence, Aligner, AlignerKind};
 use bioseq::{Aac, HasSequence};
