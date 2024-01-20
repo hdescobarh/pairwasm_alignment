@@ -3,7 +3,7 @@
 ![Rust](https://img.shields.io/badge/-Rust-B7410E?logo=rust&logoColor=28282B&labelColor=white)
 ![WebAssembly](https://img.shields.io/badge/-WebAssembly-654FF0?logo=webassembly&logoColor=654FF0&labelColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![VSCode](https://img.shields.io/badge/-VSCode-007acc?logo=visualstudiocode&logoColor=007acc&labelColor=white)
+![Experimental](https://img.shields.io/badge/stability-experimental-orange)
 
 ## Description
 
