@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["BackTrack"],"struct":["AlignmentSequence"],"trait":["AffineTransversalOrder"]};

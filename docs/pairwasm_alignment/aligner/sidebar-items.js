@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["AlignerKind"],"fn":["aminoacid_align_builder"],"mod":["utils"],"trait":["Aligner"]};

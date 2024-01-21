@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["AaScoringKind"],"fn":["similarity_builder"],"struct":["Blosum45","Blosum62","Pam160"]};

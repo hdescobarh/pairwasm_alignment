@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Aac","ErrorKind"],"struct":["Protein","SeqError"],"trait":["HasSequence"]};
