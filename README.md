@@ -10,6 +10,8 @@
 
 This is an experiment implementing a WebAssembly pairwise sequence alignment module in Rust 🦀.
 
+- [Rust crate documentation](https://hdescobarh.github.io/pairwasm_alignment/pairwasm_alignment/)
+
 ## Known issues
 
 - Using affine gap model can give suboptimal alignments.
