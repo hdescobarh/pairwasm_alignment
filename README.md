@@ -10,8 +10,21 @@
 
 This is an experiment implementing a WebAssembly pairwise sequence alignment module in Rust 🦀.
 
-- [Rust crate documentation](https://hdescobarh.github.io/pairwasm_alignment/pairwasm_alignment/)
+> [!NOTE]
+> [Rust crate documentation](https://hdescobarh.github.io/pairwasm_alignment/pairwasm_alignment/)
+
+## Releases
+
+- [npm Module](https://www.npmjs.com/package/pairwasm_alignment)
+
+> The wasm module itself is natively an ES module. It needs a Bundler [^1].
+
+- [Web]
+
+> It can natively be included on a web page, and doesn't require any further postprocessing [^1].
 
 ## Known issues
 
 - Using affine gap model can give suboptimal alignments.
+
+[^1]: [Deploying Rust and WebAssembly](https://rustwasm.github.io/docs/wasm-bindgen/reference/deployment.html#deploying-rust-and-webassembly).
