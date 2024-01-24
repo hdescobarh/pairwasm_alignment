@@ -14,6 +14,7 @@ keywords = [
 categories = ["science", "wasm"]
 repository = "https://github.com/hdescobarh/pairwasm_alignment"
 documentation = "https://hdescobarh.github.io/pairwasm_alignment/pairwasm_alignment/"
+homepage = "https://github.com/hdescobarh/pairwasm_alignment#readme"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
