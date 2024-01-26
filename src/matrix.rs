@@ -1,6 +1,7 @@
 //! Matricial data structures.
 
-use std::fmt::Debug;
+use std::error;
+use std::fmt::{self, Debug};
 use std::ops::{Index, IndexMut};
 
 /// Representation of a Matrix (aᵢⱼ), 0 ≤ i < rows , 0 ≤ j < cols.
@@ -303,6 +304,14 @@ impl MatError {
         Self { kind, message }
     }
 }
+
+impl fmt::Display for MatError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({:?}) {}", self.kind, self.message)
+    }
+}
+
+impl error::Error for MatError {}
 
 #[cfg(test)]
 mod test {
