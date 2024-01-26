@@ -25,12 +25,16 @@ pub fn do_protein_alignment(
     substitution_matrix: u8,
     algorithm: u8,
 ) -> String {
+    console_error_panic_hook::set_once();
+
     let sequence_1 = Protein::new(string_1).unwrap();
     let sequence_2 = Protein::new(string_2).unwrap();
 
     let penalty_kind = PenaltyKind::Affine(open_cost, extend_cost);
     let score_kind = match substitution_matrix {
         b'\x01' => AaScoringKind::Blosum45,
+        b'\x02' => AaScoringKind::Blosum62,
+        b'\x03' => AaScoringKind::Pam160,
         _ => panic!("Invalid option"),
     };
 
