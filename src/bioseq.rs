@@ -137,6 +137,9 @@ impl Protein {
         }
         let mut sequence: Vec<Aac> = Vec::new();
         for c in string.chars() {
+            if c.is_ascii_whitespace() {
+                continue;
+            }
             sequence.push(Aac::from_char(c)?)
         }
         Ok(Self { sequence })
