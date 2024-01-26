@@ -8,10 +8,9 @@ mod utils;
 #[cfg(test)]
 pub mod tests;
 
-use aligner::{utils::AlignmentSequence, Aligner, AlignerKind};
-use bioseq::{Aac, HasSequence};
+use aligner::AlignerKind;
 use scoring_schema::{aminoacid_schema::AaScoringKind, gap_penalty::PenaltyKind};
-use utils::{set_panic_hook, AlignmentUnit};
+use utils::set_panic_hook;
 use wasm_bindgen::prelude::*;
 
 use crate::bioseq::Protein;
@@ -28,6 +27,7 @@ pub fn do_protein_alignment(
     // set panic_hook
     set_panic_hook();
 
+    // set and run alignment
     let sequence_1 = Protein::new(string_1)?;
     let sequence_2 = Protein::new(string_2)?;
 
@@ -45,54 +45,16 @@ pub fn do_protein_alignment(
         _ => panic!("Invalid option"),
     };
 
-    let session: AlignerSession<Aac> = AlignerSession::new(
+    let mut aligner_instance = aligner::aminoacid_align_builder(
+        aligner_kind,
         sequence_1,
         sequence_2,
-        aligner_kind,
         score_kind,
         penalty_kind,
     );
 
-    Ok(session
+    Ok(aligner_instance
         .run()
         .into_iter()
         .fold(String::new(), |acc, e| acc + &format!("{}", e)))
-}
-
-pub struct AlignerSession<A>
-where
-    A: AlignmentUnit,
-{
-    aligner: Option<Box<dyn Aligner<A>>>,
-}
-
-impl<A: AlignmentUnit> AlignerSession<A> {
-    fn run(self) -> Vec<AlignmentSequence<A>> {
-        match self.aligner {
-            Some(mut aligner) => aligner.run(),
-            None => panic!("Missing aligner."),
-        }
-    }
-}
-
-impl AlignerSession<Aac> {
-    pub fn new(
-        sequence_1: impl HasSequence<Aac> + 'static,
-        sequence_2: impl HasSequence<Aac> + 'static,
-        aligner_kind: AlignerKind,
-        score_kind: AaScoringKind,
-        penalty_kind: PenaltyKind,
-    ) -> Self {
-        let aligner = aligner::aminoacid_align_builder(
-            aligner_kind,
-            sequence_1,
-            sequence_2,
-            score_kind,
-            penalty_kind,
-        );
-
-        Self {
-            aligner: Some(aligner),
-        }
-    }
 }
