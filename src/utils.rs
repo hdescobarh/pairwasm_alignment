@@ -1,5 +1,3 @@
-use std::error::Error;
-
 // https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/template-deep-dive/src-utils-rs.html
 pub fn set_panic_hook() {
     // When the `console_error_panic_hook` feature is enabled, we can call the

@@ -11,7 +11,7 @@ pub mod tests;
 use aligner::{utils::AlignmentSequence, Aligner, AlignerKind};
 use bioseq::{Aac, HasSequence};
 use scoring_schema::{aminoacid_schema::AaScoringKind, gap_penalty::PenaltyKind};
-use utils::AlignmentUnit;
+use utils::{set_panic_hook, AlignmentUnit};
 use wasm_bindgen::prelude::*;
 
 use crate::bioseq::Protein;
@@ -25,7 +25,8 @@ pub fn do_protein_alignment(
     substitution_matrix: u8,
     algorithm: u8,
 ) -> Result<String, JsError> {
-    console_error_panic_hook::set_once();
+    // set panic_hook
+    set_panic_hook();
 
     let sequence_1 = Protein::new(string_1)?;
     let sequence_2 = Protein::new(string_2)?;
