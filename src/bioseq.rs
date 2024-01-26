@@ -1,7 +1,10 @@
 //! Data structures representing biological sequences and their building blocks.
 
 use crate::utils::AlignmentUnit;
-use std::fmt::Debug;
+use std::{
+    error,
+    fmt::{self, Debug},
+};
 
 /// IUPAC Amino acid codes. Represents the basic 20 amino acids.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -169,7 +172,7 @@ impl SeqError {
                 "The string contains a non valid IUPAC code.".to_string()
             }
             ErrorKind::EmptyString => {
-                "The string must containt at least one IUPAC code".to_string()
+                "The string must contain at least one IUPAC code".to_string()
             }
             ErrorKind::NonAscii => {
                 "All the IUPAC codes must be ASCII characters.".to_string()
@@ -179,6 +182,14 @@ impl SeqError {
         Self { kind, message }
     }
 }
+
+impl fmt::Display for SeqError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({:?}) {}", self.kind, self.message)
+    }
+}
+
+impl error::Error for SeqError {}
 
 #[cfg(test)]
 mod test {

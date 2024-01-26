@@ -24,11 +24,11 @@ pub fn do_protein_alignment(
     extend_cost: f32,
     substitution_matrix: u8,
     algorithm: u8,
-) -> String {
+) -> Result<String, JsError> {
     console_error_panic_hook::set_once();
 
-    let sequence_1 = Protein::new(string_1).unwrap();
-    let sequence_2 = Protein::new(string_2).unwrap();
+    let sequence_1 = Protein::new(string_1)?;
+    let sequence_2 = Protein::new(string_2)?;
 
     let penalty_kind = PenaltyKind::Affine(open_cost, extend_cost);
     let score_kind = match substitution_matrix {
@@ -52,10 +52,10 @@ pub fn do_protein_alignment(
         penalty_kind,
     );
 
-    session
+    Ok(session
         .run()
         .into_iter()
-        .fold(String::new(), |acc, e| acc + &format!("{}", e))
+        .fold(String::new(), |acc, e| acc + &format!("{}", e)))
 }
 
 pub struct AlignerSession<A>
