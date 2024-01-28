@@ -16,7 +16,9 @@ WASM module use is pretty straightforward since it only exposes a single functio
 
 I also deployed an online demonstration that runs __locally__ and on __your browser__. Be aware that those algorithms uses brute force and have [quadratic performance](https://en.wikipedia.org/wiki/Big_O_notation), __do not__ use the demo for long sequences.
 
-<a href="https://hansescobar.com/en/demo/pairwasm" style="font-size: 1.8rem;"><p style="display:block">Link to the demo<p><img title="pairwasm_alingment" alt="Screenshot of pairwasm_alignment online demo" src="image.png" style="height: auto; width: 20rem"></a>
+<a target="_blank=" href="https://hansescobar.com/en/demo/pairwasm">Link to the demo</a>
+
+<a target="_blank=" href="https://hansescobar.com/en/demo/pairwasm"><img title="pairwasm_alingment" alt="Screenshot of pairwasm_alignment online demo" src="image.png" style="height: auto; width: 20rem"></a>
 
 ## Releases and how to use them
 
