@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["do_protein_alignment"],"mod":["aligner","bioseq","formatter","matrix","scoring_schema"],"struct":["AlignerSession"]};
+window.SIDEBAR_ITEMS = {"enum":["InputErrorKind"],"fn":["do_protein_alignment"],"mod":["aligner","bioseq","formatter","matrix","scoring_schema","utils"],"struct":["InputError"]};

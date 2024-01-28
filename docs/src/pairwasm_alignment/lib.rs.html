@@ -93,6 +93,19 @@ data-use_system_theme="false"></script><meta name="rustdoc-vars" data-root-path=
 <a href="#91" id="91">91</a>
 <a href="#92" id="92">92</a>
 <a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
 </pre></div><pre class="rust"><code><span class="kw">pub mod </span>aligner;
 <span class="kw">pub mod </span>bioseq;
 <span class="kw">pub mod </span>formatter;
@@ -103,10 +116,10 @@ data-use_system_theme="false"></script><meta name="rustdoc-vars" data-root-path=
 <span class="attr">#[cfg(test)]
 </span><span class="kw">pub mod </span>tests;
 
-<span class="kw">use </span>aligner::{utils::AlignmentSequence, Aligner, AlignerKind};
-<span class="kw">use </span>bioseq::{Aac, HasSequence};
+<span class="kw">use </span>aligner::AlignerKind;
 <span class="kw">use </span>scoring_schema::{aminoacid_schema::AaScoringKind, gap_penalty::PenaltyKind};
-<span class="kw">use </span>utils::AlignmentUnit;
+<span class="kw">use </span>std::{error, fmt};
+<span class="kw">use </span>utils::set_panic_hook;
 <span class="kw">use </span>wasm_bindgen::prelude::<span class="kw-2">*</span>;
 
 <span class="kw">use </span><span class="kw">crate</span>::bioseq::Protein;
@@ -119,71 +132,84 @@ data-use_system_theme="false"></script><meta name="rustdoc-vars" data-root-path=
     extend_cost: f32,
     substitution_matrix: u8,
     algorithm: u8,
-) -&gt; String {
-    <span class="kw">let </span>sequence_1 = Protein::new(string_1).unwrap();
-    <span class="kw">let </span>sequence_2 = Protein::new(string_2).unwrap();
+) -&gt; <span class="prelude-ty">Result</span>&lt;String, JsError&gt; {
+    <span class="comment">// set panic_hook
+    </span>set_panic_hook();
+
+    <span class="comment">// set and run alignment
+    </span><span class="kw">let </span>sequence_1 = Protein::new(string_1)<span class="question-mark">?</span>;
+    <span class="kw">let </span>sequence_2 = Protein::new(string_2)<span class="question-mark">?</span>;
 
     <span class="kw">let </span>penalty_kind = PenaltyKind::Affine(open_cost, extend_cost);
+
     <span class="kw">let </span>score_kind = <span class="kw">match </span>substitution_matrix {
         <span class="string">b&#39;\x01&#39; </span>=&gt; AaScoringKind::Blosum45,
-        <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Invalid option&quot;</span>),
+        <span class="string">b&#39;\x02&#39; </span>=&gt; AaScoringKind::Blosum62,
+        <span class="string">b&#39;\x03&#39; </span>=&gt; AaScoringKind::Pam160,
+        <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(InputError::new(InputErrorKind::ScoringMatrixNotExist))<span class="question-mark">?</span>,
     };
 
     <span class="kw">let </span>aligner_kind = <span class="kw">match </span>algorithm {
         <span class="string">b&#39;\x01&#39; </span>=&gt; AlignerKind::SmithWaterman,
         <span class="string">b&#39;\x02&#39; </span>=&gt; AlignerKind::NeedlemanWunsch,
-        <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Invalid option&quot;</span>),
+        <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(InputError::new(InputErrorKind::AlignerNotExist))<span class="question-mark">?</span>,
     };
 
-    <span class="kw">let </span>session: AlignerSession&lt;Aac&gt; = AlignerSession::new(
+    <span class="kw">let </span><span class="kw-2">mut </span>aligner_instance = aligner::aminoacid_align_builder(
+        aligner_kind,
         sequence_1,
         sequence_2,
-        aligner_kind,
         score_kind,
         penalty_kind,
     );
 
-    session
+    <span class="prelude-val">Ok</span>(aligner_instance
         .run()
         .into_iter()
-        .fold(String::new(), |acc, e| acc + <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, e))
+        .fold(String::new(), |acc, e| acc + <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, e)))
 }
 
-<span class="kw">pub struct </span>AlignerSession&lt;A&gt;
-<span class="kw">where
-    </span>A: AlignmentUnit,
-{
-    aligner: <span class="prelude-ty">Option</span>&lt;Box&lt;<span class="kw">dyn </span>Aligner&lt;A&gt;&gt;&gt;,
+<span class="attr">#[derive(Debug)]
+</span><span class="doccomment">/// Error type for input operations.
+</span><span class="kw">pub struct </span>InputError {
+    kind: InputErrorKind,
+    message: String,
 }
 
-<span class="kw">impl</span>&lt;A: AlignmentUnit&gt; AlignerSession&lt;A&gt; {
-    <span class="kw">fn </span>run(<span class="self">self</span>) -&gt; Vec&lt;AlignmentSequence&lt;A&gt;&gt; {
-        <span class="kw">match </span><span class="self">self</span>.aligner {
-            <span class="prelude-val">Some</span>(<span class="kw-2">mut </span>aligner) =&gt; aligner.run(),
-            <span class="prelude-val">None </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Missing aligner.&quot;</span>),
-        }
+<span class="attr">#[non_exhaustive]
+#[derive(Debug, PartialEq)]
+</span><span class="doccomment">/// A list specifying general error categories of InputError.
+</span><span class="kw">pub enum </span>InputErrorKind {
+    AlignerNotExist,
+    GapModelNotExist,
+    ScoringMatrixNotExist,
+}
+
+<span class="kw">impl </span>InputError {
+    <span class="kw">fn </span>new(kind: InputErrorKind) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span><span class="kw-2">mut </span>message: String = <span class="kw">match </span>kind {
+            InputErrorKind::AlignerNotExist =&gt; {
+                <span class="string">&quot;The chosen aligner algorithm does not exist.&quot;</span>.to_string()
+            }
+            InputErrorKind::GapModelNotExist =&gt; {
+                <span class="string">&quot;The chosen gap model does not exist.&quot;</span>.to_string()
+            }
+            InputErrorKind::ScoringMatrixNotExist =&gt; {
+                <span class="string">&quot;The chosen scoring matrix does not exist.&quot;</span>.to_string()
+            }
+        };
+
+        message.push_str(<span class="string">&quot; Please check the documentation for more information.&quot;</span>);
+
+        <span class="self">Self </span>{ kind, message }
     }
 }
 
-<span class="kw">impl </span>AlignerSession&lt;Aac&gt; {
-    <span class="kw">pub fn </span>new(
-        sequence_1: <span class="kw">impl </span>HasSequence&lt;Aac&gt; + <span class="lifetime">&#39;static</span>,
-        sequence_2: <span class="kw">impl </span>HasSequence&lt;Aac&gt; + <span class="lifetime">&#39;static</span>,
-        aligner_kind: AlignerKind,
-        score_kind: AaScoringKind,
-        penalty_kind: PenaltyKind,
-    ) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>aligner = aligner::aminoacid_align_builder(
-            aligner_kind,
-            sequence_1,
-            sequence_2,
-            score_kind,
-            penalty_kind,
-        );
-
-        <span class="self">Self </span>{
-            aligner: <span class="prelude-val">Some</span>(aligner),
-        }
+<span class="kw">impl </span>fmt::Display <span class="kw">for </span>InputError {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">&quot;({:?}) {}&quot;</span>, <span class="self">self</span>.kind, <span class="self">self</span>.message)
     }
 }
+
+<span class="kw">impl </span>error::Error <span class="kw">for </span>InputError {}
 </code></pre></div></section></main></body></html>

@@ -978,21 +978,6 @@ data-use_system_theme="false"></script><meta name="rustdoc-vars" data-root-path=
 <a href="#976" id="976">976</a>
 <a href="#977" id="977">977</a>
 <a href="#978" id="978">978</a>
-<a href="#979" id="979">979</a>
-<a href="#980" id="980">980</a>
-<a href="#981" id="981">981</a>
-<a href="#982" id="982">982</a>
-<a href="#983" id="983">983</a>
-<a href="#984" id="984">984</a>
-<a href="#985" id="985">985</a>
-<a href="#986" id="986">986</a>
-<a href="#987" id="987">987</a>
-<a href="#988" id="988">988</a>
-<a href="#989" id="989">989</a>
-<a href="#990" id="990">990</a>
-<a href="#991" id="991">991</a>
-<a href="#992" id="992">992</a>
-<a href="#993" id="993">993</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! common data structures and functions used for multiple align algorithms
 
 </span><span class="kw">use crate</span>::{
@@ -1086,86 +1071,71 @@ data-use_system_theme="false"></script><meta name="rustdoc-vars" data-root-path=
     ) -&gt; Vec&lt;Vec&lt;[usize; <span class="number">2</span>]&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>paths: Vec&lt;Vec&lt;[usize; <span class="number">2</span>]&gt;&gt; = Vec::new();
         <span class="kw">let </span><span class="kw-2">mut </span>pending_stack: Vec&lt;Vec&lt;[usize; <span class="number">2</span>]&gt;&gt; = Vec::new();
-        <span class="kw">let </span>current_path: Vec&lt;[usize; <span class="number">2</span>]&gt; = <span class="macro">vec!</span>[[init_row, init_col]];
-        <span class="self">Self</span>::find_paths(
-            matrix,
-            current_path,
-            <span class="kw-2">&amp;mut </span>pending_stack,
-            <span class="kw-2">&amp;mut </span>paths,
-            cutoff_score,
-        );
-        paths
-    }
+        <span class="kw">let </span><span class="kw-2">mut </span>current_path: Vec&lt;[usize; <span class="number">2</span>]&gt; =
+            Vec::with_capacity(matrix.dim()[<span class="number">0</span>].max(matrix.dim()[<span class="number">1</span>]));
+        current_path.push([init_row, init_col]);
 
-    <span class="kw">fn </span>find_paths(
-        matrix: <span class="kw-2">&amp;</span>Matrix&lt;BackTrack&gt;,
-        <span class="kw-2">mut </span>current_path: Vec&lt;[usize; <span class="number">2</span>]&gt;,
-        pending_stack: <span class="kw-2">&amp;mut </span>Vec&lt;Vec&lt;[usize; <span class="number">2</span>]&gt;&gt;,
-        paths: <span class="kw-2">&amp;mut </span>Vec&lt;Vec&lt;[usize; <span class="number">2</span>]&gt;&gt;,
-        <span class="comment">// The minimum allowed score of a single node. The path ends prematurely if
-        // a score lower or equal is found.
-        </span>cutoff_score: f32,
-    ) {
-        <span class="kw">let </span>[row, col] = <span class="kw-2">*</span>current_path.last().unwrap();
-        <span class="kw">let </span>(indicator, score) = <span class="self">Self</span>::decompose(matrix[[row, col]]);
-        <span class="kw">if </span>((row == <span class="number">0</span>) &amp;&amp; (col == <span class="number">0</span>)) || (score &lt;= cutoff_score) {
-            <span class="kw">match </span>pending_stack.pop() {
-                <span class="prelude-val">Some</span>(next_path) =&gt; {
-                    <span class="kw">let </span>old_path = replace(<span class="kw-2">&amp;mut </span>current_path, next_path);
-                    paths.push(old_path);
-                }
-                <span class="prelude-val">None </span>=&gt; {
-                    paths.push(current_path);
-                    <span class="kw">return</span>;
-                }
-            }
-        } <span class="kw">else </span>{
-            <span class="kw">match </span>indicator {
-                <span class="comment">// T
-                </span><span class="string">b&#39;\x01&#39; </span>=&gt; current_path.push([row - <span class="number">1</span>, col]),
-                <span class="comment">//D
-                </span><span class="string">b&#39;\x02&#39; </span>=&gt; current_path.push([row - <span class="number">1</span>, col - <span class="number">1</span>]),
-                <span class="comment">//L
-                </span><span class="string">b&#39;\x04&#39; </span>=&gt; current_path.push([row, col - <span class="number">1</span>]),
-                <span class="comment">//DT
-                </span><span class="string">b&#39;\x03&#39; </span>=&gt; {
-                    <span class="kw">let </span><span class="kw-2">mut </span>branch = current_path.clone();
-                    branch.push([row - <span class="number">1</span>, col]);
-                    pending_stack.push(branch);
-                    current_path.push([row - <span class="number">1</span>, col - <span class="number">1</span>]);
-                    },
-                <span class="comment">//DL
-                </span><span class="string">b&#39;\x06&#39; </span>=&gt; {
-                    <span class="kw">let </span><span class="kw-2">mut </span>branch = current_path.clone();
-                    branch.push([row, col - <span class="number">1</span>]);
-                    pending_stack.push(branch);
-                    current_path.push([row - <span class="number">1</span>, col - <span class="number">1</span>]);
-                }
-                <span class="comment">//TL
-                </span><span class="string">b&#39;\x05&#39; </span>=&gt; {
-                    <span class="kw">let </span><span class="kw-2">mut </span>branch = current_path.clone();
-                    branch.push([row, col - <span class="number">1</span>]);
-                    pending_stack.push(branch);
-                    current_path.push([row - <span class="number">1</span>, col]);
-                }
-                <span class="comment">//All
-                </span><span class="string">b&#39;\x07&#39; </span>=&gt; {
-                    <span class="kw">let </span><span class="kw-2">mut </span>branch = current_path.clone();
-                    branch.push([row, col - <span class="number">1</span>]);
-                    pending_stack.push(branch);
+        <span class="kw">loop </span>{
+            <span class="kw">let </span>[row, col] = <span class="kw-2">*</span>current_path.last().unwrap();
+            <span class="kw">let </span>(indicator, score) = <span class="self">Self</span>::decompose(matrix[[row, col]]);
+            <span class="kw">if </span>((row == <span class="number">0</span>) &amp;&amp; (col == <span class="number">0</span>)) || (score &lt;= cutoff_score) {
+                <span class="kw">match </span>pending_stack.pop() {
+                    <span class="prelude-val">Some</span>(next_path) =&gt; {
+                        <span class="kw">let </span>old_path = replace(<span class="kw-2">&amp;mut </span>current_path, next_path);
+                        paths.push(old_path);
+                    }
+                    <span class="prelude-val">None </span>=&gt; {
+                        paths.push(current_path);
+                        <span class="kw">return </span>paths;
+                    }
+                };
+            } <span class="kw">else </span>{
+                <span class="kw">match </span>indicator {
+                    <span class="comment">// T
+                    </span><span class="string">b&#39;\x01&#39; </span>=&gt; current_path.push([row - <span class="number">1</span>, col]),
+                    <span class="comment">//D
+                    </span><span class="string">b&#39;\x02&#39; </span>=&gt; current_path.push([row - <span class="number">1</span>, col - <span class="number">1</span>]),
+                    <span class="comment">//L
+                    </span><span class="string">b&#39;\x04&#39; </span>=&gt; current_path.push([row, col - <span class="number">1</span>]),
+                    <span class="comment">//DT
+                    </span><span class="string">b&#39;\x03&#39; </span>=&gt; {
+                        <span class="kw">let </span><span class="kw-2">mut </span>branch = current_path.clone();
+                        branch.push([row - <span class="number">1</span>, col]);
+                        pending_stack.push(branch);
+                        current_path.push([row - <span class="number">1</span>, col - <span class="number">1</span>]);
+                        },
+                    <span class="comment">//DL
+                    </span><span class="string">b&#39;\x06&#39; </span>=&gt; {
+                        <span class="kw">let </span><span class="kw-2">mut </span>branch = current_path.clone();
+                        branch.push([row, col - <span class="number">1</span>]);
+                        pending_stack.push(branch);
+                        current_path.push([row - <span class="number">1</span>, col - <span class="number">1</span>]);
+                    }
+                    <span class="comment">//TL
+                    </span><span class="string">b&#39;\x05&#39; </span>=&gt; {
+                        <span class="kw">let </span><span class="kw-2">mut </span>branch = current_path.clone();
+                        branch.push([row, col - <span class="number">1</span>]);
+                        pending_stack.push(branch);
+                        current_path.push([row - <span class="number">1</span>, col]);
+                    }
+                    <span class="comment">//All
+                    </span><span class="string">b&#39;\x07&#39; </span>=&gt; {
+                        <span class="kw">let </span><span class="kw-2">mut </span>branch = current_path.clone();
+                        branch.push([row, col - <span class="number">1</span>]);
+                        pending_stack.push(branch);
 
-                    <span class="kw">let </span><span class="kw-2">mut </span>branch = current_path.clone();
-                    branch.push([row - <span class="number">1</span>, col]);
-                    pending_stack.push(branch);
+                        <span class="kw">let </span><span class="kw-2">mut </span>branch = current_path.clone();
+                        branch.push([row - <span class="number">1</span>, col]);
+                        pending_stack.push(branch);
 
-                    current_path.push([row - <span class="number">1</span>, col - <span class="number">1</span>])}
+                        current_path.push([row - <span class="number">1</span>, col - <span class="number">1</span>])}
 
-                <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(
-                    <span class="string">&quot;Empty at [{row}, {col}]. Any implementation must remove all Empty from the matrix.&quot;
-                </span>),
+                    <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(
+                        <span class="string">&quot;Empty at [{row}, {col}]. Any implementation must remove all Empty from the matrix.&quot;
+                    </span>),
+                };
             };
-        };
-        <span class="self">Self</span>::find_paths(matrix, current_path, pending_stack, paths, cutoff_score);
+        }
     }
 
     <span class="doccomment">/// Separates the BackTrack from its associated value. If BackTrack::Empty, returns NAN.

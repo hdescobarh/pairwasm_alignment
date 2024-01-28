@@ -278,6 +278,17 @@ data-use_system_theme="false"></script><meta name="rustdoc-vars" data-root-path=
 <a href="#276" id="276">276</a>
 <a href="#277" id="277">277</a>
 <a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::Aligner;
 <span class="comment">// The original Needleman-Wunsch uses a linear gap penalty
 </span><span class="kw">use </span><span class="kw">super</span>::utils::{AffineTransversalOrder, AlignmentSequence, BackTrack};
@@ -337,16 +348,27 @@ data-use_system_theme="false"></script><meta name="rustdoc-vars" data-root-path=
         <span class="kw">let </span>[init_row, init_col] = [row_dim - <span class="number">1</span>, col_dim - <span class="number">1</span>];
         <span class="kw">let </span>all_paths =
             BackTrack::backtracking(<span class="kw-2">&amp;</span><span class="self">self</span>.matrix, init_row, init_col, f32::NEG_INFINITY);
-        <span class="kw">let </span><span class="kw-2">mut </span>alignments: Vec&lt;AlignmentSequence&lt;A&gt;&gt; =
-            Vec::with_capacity(all_paths.len());
-        <span class="kw">for </span>backtrack_path <span class="kw">in </span>all_paths {
-            <span class="kw">let </span>new_alignment = AlignmentSequence::new(
-                backtrack_path,
-                <span class="self">self</span>.sequence_left.as_ref(),
-                <span class="self">self</span>.sequence_top.as_ref(),
-            );
-            alignments.push(new_alignment);
-        }
+        <span class="comment">//let mut alignments: Vec&lt;AlignmentSequence&lt;A&gt;&gt; =
+        //    Vec::with_capacity(all_paths.len());
+
+        </span><span class="kw">let </span>longest_path = all_paths
+            .into_iter()
+            .reduce(|acc, e| <span class="kw">if </span>acc.len() &gt; e.len() { acc } <span class="kw">else </span>{ e })
+            .unwrap();
+
+        <span class="comment">//for backtrack_path in all_paths {
+        //    let new_alignment = AlignmentSequence::new(
+        //        backtrack_path,
+        //        self.sequence_left.as_ref(),
+        //        self.sequence_top.as_ref(),
+        //    );
+        //    alignments.push(new_alignment);
+
+        </span><span class="kw">let </span>alignments: Vec&lt;AlignmentSequence&lt;A&gt;&gt; = <span class="macro">vec!</span>[AlignmentSequence::new(
+            longest_path,
+            <span class="self">self</span>.sequence_left.as_ref(),
+            <span class="self">self</span>.sequence_top.as_ref(),
+        )];
         alignments
     }
     <span class="kw">fn </span>initialize(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {

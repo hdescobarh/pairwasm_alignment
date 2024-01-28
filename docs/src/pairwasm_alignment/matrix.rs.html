@@ -401,9 +401,19 @@ data-use_system_theme="false"></script><meta name="rustdoc-vars" data-root-path=
 <a href="#399" id="399">399</a>
 <a href="#400" id="400">400</a>
 <a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Matricial data structures.
 
-</span><span class="kw">use </span>std::fmt::Debug;
+</span><span class="kw">use </span>std::error;
+<span class="kw">use </span>std::fmt::{<span class="self">self</span>, Debug};
 <span class="kw">use </span>std::ops::{Index, IndexMut};
 
 <span class="doccomment">/// Representation of a Matrix (aᵢⱼ), 0 ≤ i &lt; rows , 0 ≤ j &lt; cols.
@@ -706,6 +716,14 @@ data-use_system_theme="false"></script><meta name="rustdoc-vars" data-root-path=
         <span class="self">Self </span>{ kind, message }
     }
 }
+
+<span class="kw">impl </span>fmt::Display <span class="kw">for </span>MatError {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">&quot;({:?}) {}&quot;</span>, <span class="self">self</span>.kind, <span class="self">self</span>.message)
+    }
+}
+
+<span class="kw">impl </span>error::Error <span class="kw">for </span>MatError {}
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {

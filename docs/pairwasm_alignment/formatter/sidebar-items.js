@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {};
+window.SIDEBAR_ITEMS = {"constant":["GAP_STR","MATCH_STR","MISMATCH_STR","SPACE_STR"]};

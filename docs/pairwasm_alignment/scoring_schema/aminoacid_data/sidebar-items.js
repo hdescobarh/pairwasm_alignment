@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["map_aminoacid_to_index","read_blosum45","read_blosum62","read_pam160"]};

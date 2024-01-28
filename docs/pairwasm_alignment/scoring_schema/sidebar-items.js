@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["aminoacid_schema","gap_penalty"],"struct":["AaScoringSchema"],"trait":["GapPenalty","ScoringSchema","Similarity"]};
+window.SIDEBAR_ITEMS = {"mod":["aminoacid_data","aminoacid_schema","gap_penalty"],"struct":["AaScoringSchema"],"trait":["GapPenalty","ScoringSchema","Similarity"],"type":["CostType","SimilarityType"]};
