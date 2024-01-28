@@ -8,10 +8,10 @@ mod utils;
 #[cfg(test)]
 pub mod tests;
 
-use aligner::{utils::AlignmentSequence, Aligner, AlignerKind};
-use bioseq::{Aac, HasSequence};
+use aligner::AlignerKind;
 use scoring_schema::{aminoacid_schema::AaScoringKind, gap_penalty::PenaltyKind};
-use utils::AlignmentUnit;
+use std::{error, fmt};
+use utils::set_panic_hook;
 use wasm_bindgen::prelude::*;
 
 use crate::bioseq::Protein;
@@ -24,70 +24,83 @@ pub fn do_protein_alignment(
     extend_cost: f32,
     substitution_matrix: u8,
     algorithm: u8,
-) -> String {
-    let sequence_1 = Protein::new(string_1).unwrap();
-    let sequence_2 = Protein::new(string_2).unwrap();
+) -> Result<String, JsError> {
+    // set panic_hook
+    set_panic_hook();
+
+    // set and run alignment
+    let sequence_1 = Protein::new(string_1)?;
+    let sequence_2 = Protein::new(string_2)?;
 
     let penalty_kind = PenaltyKind::Affine(open_cost, extend_cost);
+
     let score_kind = match substitution_matrix {
         b'\x01' => AaScoringKind::Blosum45,
-        _ => panic!("Invalid option"),
+        b'\x02' => AaScoringKind::Blosum62,
+        b'\x03' => AaScoringKind::Pam160,
+        _ => Err(InputError::new(InputErrorKind::ScoringMatrixNotExist))?,
     };
 
     let aligner_kind = match algorithm {
         b'\x01' => AlignerKind::SmithWaterman,
         b'\x02' => AlignerKind::NeedlemanWunsch,
-        _ => panic!("Invalid option"),
+        _ => Err(InputError::new(InputErrorKind::AlignerNotExist))?,
     };
 
-    let session: AlignerSession<Aac> = AlignerSession::new(
+    let mut aligner_instance = aligner::aminoacid_align_builder(
+        aligner_kind,
         sequence_1,
         sequence_2,
-        aligner_kind,
         score_kind,
         penalty_kind,
     );
 
-    session
+    Ok(aligner_instance
         .run()
         .into_iter()
-        .fold(String::new(), |acc, e| acc + &format!("{}", e))
+        .fold(String::new(), |acc, e| acc + &format!("{}", e)))
 }
 
-pub struct AlignerSession<A>
-where
-    A: AlignmentUnit,
-{
-    aligner: Option<Box<dyn Aligner<A>>>,
+#[derive(Debug)]
+/// Error type for input operations.
+pub struct InputError {
+    kind: InputErrorKind,
+    message: String,
 }
 
-impl<A: AlignmentUnit> AlignerSession<A> {
-    fn run(self) -> Vec<AlignmentSequence<A>> {
-        match self.aligner {
-            Some(mut aligner) => aligner.run(),
-            None => panic!("Missing aligner."),
-        }
+#[non_exhaustive]
+#[derive(Debug, PartialEq)]
+/// A list specifying general error categories of InputError.
+pub enum InputErrorKind {
+    AlignerNotExist,
+    GapModelNotExist,
+    ScoringMatrixNotExist,
+}
+
+impl InputError {
+    fn new(kind: InputErrorKind) -> Self {
+        let mut message: String = match kind {
+            InputErrorKind::AlignerNotExist => {
+                "The chosen aligner algorithm does not exist.".to_string()
+            }
+            InputErrorKind::GapModelNotExist => {
+                "The chosen gap model does not exist.".to_string()
+            }
+            InputErrorKind::ScoringMatrixNotExist => {
+                "The chosen scoring matrix does not exist.".to_string()
+            }
+        };
+
+        message.push_str(" Please check the documentation for more information.");
+
+        Self { kind, message }
     }
 }
 
-impl AlignerSession<Aac> {
-    pub fn new(
-        sequence_1: impl HasSequence<Aac> + 'static,
-        sequence_2: impl HasSequence<Aac> + 'static,
-        aligner_kind: AlignerKind,
-        score_kind: AaScoringKind,
-        penalty_kind: PenaltyKind,
-    ) -> Self {
-        let aligner = aligner::aminoacid_align_builder(
-            aligner_kind,
-            sequence_1,
-            sequence_2,
-            score_kind,
-            penalty_kind,
-        );
-
-        Self {
-            aligner: Some(aligner),
-        }
+impl fmt::Display for InputError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({:?}) {}", self.kind, self.message)
     }
 }
+
+impl error::Error for InputError {}

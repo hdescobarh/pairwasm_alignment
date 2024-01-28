@@ -91,86 +91,71 @@ impl BackTrack {
     ) -> Vec<Vec<[usize; 2]>> {
         let mut paths: Vec<Vec<[usize; 2]>> = Vec::new();
         let mut pending_stack: Vec<Vec<[usize; 2]>> = Vec::new();
-        let current_path: Vec<[usize; 2]> = vec![[init_row, init_col]];
-        Self::find_paths(
-            matrix,
-            current_path,
-            &mut pending_stack,
-            &mut paths,
-            cutoff_score,
-        );
-        paths
-    }
+        let mut current_path: Vec<[usize; 2]> =
+            Vec::with_capacity(matrix.dim()[0].max(matrix.dim()[1]));
+        current_path.push([init_row, init_col]);
 
-    fn find_paths(
-        matrix: &Matrix<BackTrack>,
-        mut current_path: Vec<[usize; 2]>,
-        pending_stack: &mut Vec<Vec<[usize; 2]>>,
-        paths: &mut Vec<Vec<[usize; 2]>>,
-        // The minimum allowed score of a single node. The path ends prematurely if
-        // a score lower or equal is found.
-        cutoff_score: f32,
-    ) {
-        let [row, col] = *current_path.last().unwrap();
-        let (indicator, score) = Self::decompose(matrix[[row, col]]);
-        if ((row == 0) && (col == 0)) || (score <= cutoff_score) {
-            match pending_stack.pop() {
-                Some(next_path) => {
-                    let old_path = replace(&mut current_path, next_path);
-                    paths.push(old_path);
-                }
-                None => {
-                    paths.push(current_path);
-                    return;
-                }
-            }
-        } else {
-            match indicator {
-                // T
-                b'\x01' => current_path.push([row - 1, col]),
-                //D
-                b'\x02' => current_path.push([row - 1, col - 1]),
-                //L
-                b'\x04' => current_path.push([row, col - 1]),
-                //DT
-                b'\x03' => {
-                    let mut branch = current_path.clone();
-                    branch.push([row - 1, col]);
-                    pending_stack.push(branch);
-                    current_path.push([row - 1, col - 1]);
-                    },
-                //DL
-                b'\x06' => {
-                    let mut branch = current_path.clone();
-                    branch.push([row, col - 1]);
-                    pending_stack.push(branch);
-                    current_path.push([row - 1, col - 1]);
-                }
-                //TL
-                b'\x05' => {
-                    let mut branch = current_path.clone();
-                    branch.push([row, col - 1]);
-                    pending_stack.push(branch);
-                    current_path.push([row - 1, col]);
-                }
-                //All
-                b'\x07' => {
-                    let mut branch = current_path.clone();
-                    branch.push([row, col - 1]);
-                    pending_stack.push(branch);
+        loop {
+            let [row, col] = *current_path.last().unwrap();
+            let (indicator, score) = Self::decompose(matrix[[row, col]]);
+            if ((row == 0) && (col == 0)) || (score <= cutoff_score) {
+                match pending_stack.pop() {
+                    Some(next_path) => {
+                        let old_path = replace(&mut current_path, next_path);
+                        paths.push(old_path);
+                    }
+                    None => {
+                        paths.push(current_path);
+                        return paths;
+                    }
+                };
+            } else {
+                match indicator {
+                    // T
+                    b'\x01' => current_path.push([row - 1, col]),
+                    //D
+                    b'\x02' => current_path.push([row - 1, col - 1]),
+                    //L
+                    b'\x04' => current_path.push([row, col - 1]),
+                    //DT
+                    b'\x03' => {
+                        let mut branch = current_path.clone();
+                        branch.push([row - 1, col]);
+                        pending_stack.push(branch);
+                        current_path.push([row - 1, col - 1]);
+                        },
+                    //DL
+                    b'\x06' => {
+                        let mut branch = current_path.clone();
+                        branch.push([row, col - 1]);
+                        pending_stack.push(branch);
+                        current_path.push([row - 1, col - 1]);
+                    }
+                    //TL
+                    b'\x05' => {
+                        let mut branch = current_path.clone();
+                        branch.push([row, col - 1]);
+                        pending_stack.push(branch);
+                        current_path.push([row - 1, col]);
+                    }
+                    //All
+                    b'\x07' => {
+                        let mut branch = current_path.clone();
+                        branch.push([row, col - 1]);
+                        pending_stack.push(branch);
 
-                    let mut branch = current_path.clone();
-                    branch.push([row - 1, col]);
-                    pending_stack.push(branch);
+                        let mut branch = current_path.clone();
+                        branch.push([row - 1, col]);
+                        pending_stack.push(branch);
 
-                    current_path.push([row - 1, col - 1])}
+                        current_path.push([row - 1, col - 1])}
 
-                _ => panic!(
-                    "Empty at [{row}, {col}]. Any implementation must remove all Empty from the matrix."
-                ),
+                    _ => panic!(
+                        "Empty at [{row}, {col}]. Any implementation must remove all Empty from the matrix."
+                    ),
+                };
             };
-        };
-        Self::find_paths(matrix, current_path, pending_stack, paths, cutoff_score);
+        }
     }
 
     /// Separates the BackTrack from its associated value. If BackTrack::Empty, returns NAN.

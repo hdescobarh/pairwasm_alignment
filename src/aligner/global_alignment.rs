@@ -57,16 +57,27 @@ where
         let [init_row, init_col] = [row_dim - 1, col_dim - 1];
         let all_paths =
             BackTrack::backtracking(&self.matrix, init_row, init_col, f32::NEG_INFINITY);
-        let mut alignments: Vec<AlignmentSequence<A>> =
-            Vec::with_capacity(all_paths.len());
-        for backtrack_path in all_paths {
-            let new_alignment = AlignmentSequence::new(
-                backtrack_path,
-                self.sequence_left.as_ref(),
-                self.sequence_top.as_ref(),
-            );
-            alignments.push(new_alignment);
-        }
+        //let mut alignments: Vec<AlignmentSequence<A>> =
+        //    Vec::with_capacity(all_paths.len());
+
+        let longest_path = all_paths
+            .into_iter()
+            .reduce(|acc, e| if acc.len() > e.len() { acc } else { e })
+            .unwrap();
+
+        //for backtrack_path in all_paths {
+        //    let new_alignment = AlignmentSequence::new(
+        //        backtrack_path,
+        //        self.sequence_left.as_ref(),
+        //        self.sequence_top.as_ref(),
+        //    );
+        //    alignments.push(new_alignment);
+
+        let alignments: Vec<AlignmentSequence<A>> = vec![AlignmentSequence::new(
+            longest_path,
+            self.sequence_left.as_ref(),
+            self.sequence_top.as_ref(),
+        )];
         alignments
     }
     fn initialize(&mut self) {
