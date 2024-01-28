@@ -12,13 +12,14 @@ This experiment is a WebAssembly pairwise sequence alignment module written in R
 
 ## Crate documentation and Demonstration
 
-WASM module use is pretty straightforward since it only exposes a single function. You can check the Rust crate [documentation here](https://hdescobarh.github.io/pairwasm_alignment/pairwasm_alignment/).
+The WASM module use is straightforward since it only exposes a single function; read the next section for details. Also, you can check the Rust crate [documentation here](https://hdescobarh.github.io/pairwasm_alignment/pairwasm_alignment/).
 
-I also deployed an online demonstration that runs __locally__ and on __your browser__. Be aware that those algorithms uses brute force and have [quadratic performance](https://en.wikipedia.org/wiki/Big_O_notation), __do not__ use the demo for long sequences.
+I also deployed an online demonstration that runs __locally__ and on __your browser__. Be aware that Smith-Waterman and Needleman-Winsch algorithms use brute force and have [quadratic performance](https://en.wikipedia.org/wiki/Big_O_notation). __Do not__ use the demo for long sequences.
 
-<a target="_blank=" href="https://hansescobar.com/en/demo/pairwasm">Link to the demo</a>
+</br>
 
-<a target="_blank=" href="https://hansescobar.com/en/demo/pairwasm"><img title="pairwasm_alingment" alt="Screenshot of pairwasm_alignment online demo" src="image.png" style="height: auto; width: 20rem"></a>
+[__Check the demo__</br>![pairwasm_alingment](image.png)](https://hansescobar.com/en/demo/pairwasm)
+
 
 ## Releases and how to use them
 
