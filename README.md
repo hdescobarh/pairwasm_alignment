@@ -18,7 +18,7 @@ I also deployed an online demonstration that runs __locally__ and on __your brow
 
 </br>
 
-[__Check the demo__ </br>![pairwasm_alignment](image.png)](https://hansescobar.com/en/demo/pairwasm)
+[__Check the demo__ </br>![pairwasm_alignment](image.jpeg)](https://hansescobar.com/en/demo/pairwasm)
 
 ## Releases and how to use them
 
