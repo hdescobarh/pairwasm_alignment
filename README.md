@@ -2,19 +2,19 @@
 
 ![Rust](https://img.shields.io/badge/-Rust-B7410E?logo=rust&logoColor=28282B&labelColor=white)
 ![WebAssembly](https://img.shields.io/badge/-WebAssembly-654FF0?logo=webassembly&logoColor=654FF0&labelColor=white)
-![npm](https://img.shields.io/badge/-npm-CC3534?logo=npm&labelColor=white)
+![npm](https://img.shields.io/badge/-npm-CC3534?logo=npm&labelColor=gray)
 ![Experimental](https://img.shields.io/badge/stability-experimental-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-WebAssembly performance, portability, and interoperability could bring the power of the Cloud to Bioinformatics and Computational Biology, facilitating collaboration among researchers and enhancing reproducibility.
+Leveraging the performance, portability, and interoperability of WebAssembly (Wasm) brings the advantages of cloud computing to bioinformatics and computational biology, enabling seamless collaboration among researchers and enhancing reproducibility. Wasm runs efficiently across various operating systems and hardware architectures, delivering near-native performance without the overhead of traditional virtual machines. Its low system requirements also enable rapid scaling, making cloud computing more accessible and cost-effective.
 
-This experiment is a WebAssembly pairwise sequence alignment module written in Rust 🦀. It implements the classic Needleman-Wunsch and Smith-Waterman.
+This project introduces an experimental Wasm-based module for pairwise sequence alignment, developed in Rust 🦀. It implements the classic Needleman-Wunsch and Smith-Waterman algorithms, commonly used to align DNA, RNA, and protein sequences. By combining Wasm’s cross-platform efficiency with Rust’s performance and safety, this module offers a portable, high-speed solution for sequence alignment, ideal for both cloud and web applications.
 
-## Crate documentation and Demonstration
+## Crate documentation and demonstration
 
 The WASM module use is straightforward since it only exposes a single function; read the next section for details. Also, you can check the Rust crate [documentation here](https://hdescobarh.github.io/pairwasm_alignment/pairwasm_alignment/).
 
-I also deployed an online demonstration that runs __locally__ and on __your browser__. Be aware that Smith-Waterman and Needleman-Wunsch are dynamic programming algorithms and have [quadratic time performance](https://en.wikipedia.org/wiki/Big_O_notation). __Do not__ use the demo for long sequences.
+I also deployed an online demonstration that runs __locally__ and on __your browser__. Be aware that Smith-Waterman and Needleman-Wunsch are dynamic programming algorithms with [quadratic time complexity](https://en.wikipedia.org/wiki/Big_O_notation). __Do not__ use the demo for long sequences.
 
 </br>
 
